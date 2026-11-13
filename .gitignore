@@ -1,0 +1,24 @@
+# Dependencies and builds
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+*.tsbuildinfo
+
+# Secrets and local environment (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+.supabase/
+
+# Logs and OS noise
+*.log
+.DS_Store
+Thumbs.db
+
+# Throwaway browser profile created by experiments/linkedin-search/browser-check.mjs
+experiments/linkedin-search/verification/browser-profile/
+
+# The published mock-up has its own git repository; outputs/hi-again-mockup.html is the tracked copy
+sites/
