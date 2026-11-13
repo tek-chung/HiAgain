@@ -75,3 +75,16 @@ test("character counting uses code points", () => {
   assert.equal(countChars("👋🏽"), 2);
   assert.equal(countWords("  two   words "), 2);
 });
+
+import { explainSignInError, clampDetail } from "../src/lib/core/signin-errors.ts";
+
+test("sign-in failures explain the likely fix", () => {
+  assert.match(explainSignInError("provider", "Unable to exchange external code: 4/0AQ"), /Client ID/);
+  assert.match(explainSignInError("provider", "Error getting user email from external provider"), /OpenID Connect/);
+  assert.match(explainSignInError("provider", "The redirect_uri does not match"), /callback URL/);
+  assert.match(explainSignInError("exchange", "invalid flow state, no valid flow state found"), /different web address/);
+  assert.match(explainSignInError("no_code", null), /Redirect URLs/);
+  assert.match(explainSignInError(null, null), /didn't complete/);
+  assert.equal(clampDetail("x".repeat(500))!.length, 200);
+  assert.equal(clampDetail("a\u0000b"), "a b");
+});

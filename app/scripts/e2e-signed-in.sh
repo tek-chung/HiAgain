@@ -36,6 +36,7 @@ node node_modules/next/dist/bin/next start -p "$APP_PORT" > /tmp/hiagain-e2e-app
 for i in $(seq 1 30); do curl -sf "http://localhost:$APP_PORT/" >/dev/null && break; sleep 1; done
 
 export BASE_URL="http://localhost:$APP_PORT" STUB_URL="http://localhost:$STUB_PORT"
+node scripts/auth-errors-check.mjs
 node scripts/signed-in-check.mjs
 node scripts/calendar-check.mjs
 node scripts/activity-check.mjs

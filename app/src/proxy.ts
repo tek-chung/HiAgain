@@ -4,6 +4,21 @@ import { supabaseKey, supabaseUrl, isSupabaseConfigured } from "@/lib/config";
 
 // Refreshes the Supabase session cookie on navigation so Server Components see a valid session.
 export async function proxy(request: NextRequest) {
+  // If Supabase returns someone to a page other than /auth/callback (it falls back to the Site URL
+  // when the redirect address isn't on its allow list), finish the sign-in anyway.
+  const { pathname, searchParams } = request.nextUrl;
+  if (searchParams.has("code") && !pathname.startsWith("/auth/callback") && !pathname.startsWith("/calendar/")) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/auth/callback";
+    const rest = new URLSearchParams(searchParams);
+    rest.delete("code");
+    const back = pathname + (rest.toString() ? `?${rest}` : "");
+    target.search = "";
+    target.searchParams.set("code", searchParams.get("code")!);
+    target.searchParams.set("next", back === "/" ? "/me" : back);
+    return NextResponse.redirect(target);
+  }
+
   let response = NextResponse.next({ request });
   if (!isSupabaseConfigured) return response;
 

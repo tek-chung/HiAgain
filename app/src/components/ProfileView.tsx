@@ -17,6 +17,7 @@ import { CheckIcon } from "./Icons";
 import { SavedContext, type EncounterContext } from "./SavedContext";
 import { AgainBlock, AGAIN_INTENT, type AgainState } from "./AgainBlock";
 import { guestHashFor } from "@/lib/guest-token";
+import { explainSignInError } from "@/lib/core/signin-errors";
 import { MoreActions } from "./MoreActions";
 
 export interface ServerSave { savedAt: string; note: string; noteUpdatedAt: string | null; archivedAt: string | null; context: EncounterContext | null; contextDismissed: boolean; source: string }
@@ -119,7 +120,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
         const d = drafts.find((x) => x.scope === GUEST_SCOPE && x.actionId === resumeId) ?? null;
         setResumeDraft(d ? { ...d, pendingSend: false } : null);
         if (signin === "cancelled") setResumeNotice("Sign-in was cancelled. Your draft is still here.");
-        if (signin === "failed") setResumeNotice("Sign-in didn't complete. Your draft is still here — try again.");
+        if (signin === "failed") setResumeNotice(`${explainSignInError(params.get("reason"), params.get("detail"))} Your draft is still here.`);
       }
       setOpen(resumeId);
       router.replace(`/p/${profile.publicId}`, { scroll: false }); // keep the URL clean on refresh
@@ -141,6 +142,14 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
     const { data } = (await getBrowserClient()?.rpc("set_archived", { p_public_id: profile.publicId, p_archived: archived })) ?? { data: null };
     return data === "saved";
   };
+
+  // A failed or cancelled sign-in that wasn't tied to a draft (e.g. from Again) still gets explained.
+  useEffect(() => {
+    if (resumeId && resumeId !== AGAIN_INTENT) return; // the draft-resume path explains it
+    if (signin === "failed") setResumeNotice(explainSignInError(params.get("reason"), params.get("detail")));
+    if (signin === "cancelled") setResumeNotice("Sign-in was cancelled. Nothing on this browser was lost.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ----- Notes -----
   const saveNote = async (note: string, expected: string | null): Promise<NoteSaveResult> => {

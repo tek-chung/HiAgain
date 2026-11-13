@@ -55,9 +55,7 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
       {isFixtureMode && (
         <p className="banner info small">Development fixture: this is a fictional profile. Configure Supabase to sign in with LinkedIn.</p>
       )}
-      {sp.signin === "profile_failed" && (
-        <p className="banner error" role="alert">You&apos;re signed in, but your profile couldn&apos;t be prepared. Refresh to try again.</p>
-      )}
+
       {viewer && <ImportPanel accountName={viewer.displayName} />}
       <div className="row">
         <Avatar name={name} src={profile.avatarUrl} />
