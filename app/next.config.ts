@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   // Lets the signed-in end-to-end check build separately from the normal build.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
+  experimental: {
+    // Bottom-tab pages are prefetched in full and reused for 30 s, so switching tabs is instant.
+    // Any change the person makes calls router.refresh(), which clears this cache.
+    staleTimes: { dynamic: 0, static: 30 },
+  },
   async headers() {
     return [
       {

@@ -1,7 +1,7 @@
 # Hi Again project reference
 
-**Last updated:** 14 November 2026  
-**Version:** 1.67  
+**Last updated:** 13 November 2026  
+**Version:** 1.69  
 **Stage:** Concept definition and MVP planning  
 **Owner:** Tek  
 **Purpose:** The living reference for Hi Again's product, decisions, reasoning, scope and unresolved questions. Read this before continuing project work and update it as decisions develop.
@@ -390,6 +390,10 @@ The intended tone is human, friendly, modern, clean and approachable. The naming
 
 V reports a positive response to minimalist wireframes and adds a more concrete emerging direction: light/white-neutral mobile screens, rounded cards, straightforward typography, minimal forms and three recognisable Share sections. The suggested colour mapping is **blue for Experiences, green for Ideas and pink for Value**. V's earlier suggestion that Again be quieter is **superseded by Tek's 31 October direction: make Again prominent, above the profile actions**. Exact colour codes and final components remain unapproved. [V, section 12; Tek, 31 October 2026]
 
+**Logo exploration, 13 November 2026:** Tek requested a quick minimalist, friendly logo featuring a hand. Created a waving-hand and rounded-wordmark concept at `outputs/brand/hi-again-hand-concept-v1.png`. This is an exploratory asset, not an approved final identity; the monochrome treatment and smiling palm are design proposals.
+
+The requested standalone hand and a simpler alternative without a face are saved as `outputs/brand/hi-again-hand-only-v1.png` and `outputs/brand/hi-again-hand-alternative-v1.png`. Both remain exploratory; no final selection made.
+
 ### 9.2 Agreed language
 
 | Role | Current line | Status |
@@ -768,3 +772,9 @@ This reference records project decisions. Action recommendations in the source m
 | 13 November 2026 | 1.65 | Recorded Tek's confirmation of the public-field allowlist, 2,000-character notes, calendar-disconnect rule and retention (guest visits 12 months; everything else until account deletion). Implemented guest-visit retention. |
 | 13 November 2026 | 1.66 | Recorded Tek's decision: no email notifications for the pilot. |
 | 14 November 2026 | 1.67 | Recorded profile photo upload and the CI workflow. No product decision changed. |
+
+| 13 November 2026 | 1.68 | Created the requested minimalist, friendly hand-logo concept; recorded it as exploratory rather than a final identity. |
+
+
+| 13 November 2026 | 1.69 | Added the requested standalone hand and an alternative without a face; both remain exploratory. |
+

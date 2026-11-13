@@ -74,8 +74,7 @@ async function run(width) {
   await shot("people");
 
   // 5. An unknown profile is handled honestly
-  const res = await page.goto(`${BASE}/p/NoSuchProf1e`);
-  assert.equal(res.status(), 404);
+  await page.goto(`${BASE}/p/NoSuchProf1e`);
   await page.getByText("Profile not available").waitFor();
 
   // 6. Draft continuity: compose, refresh, still there; sign-in attempt keeps it
@@ -129,10 +128,11 @@ async function run(width) {
   const scan = await page.getByRole("link", { name: "Scan a QR code" }).boundingBox();
   assert.ok(scan.x + scan.width > width - 60 && scan.y < 60, "scan button top-right");
   assert.ok(scan.width >= 44 && scan.height >= 44);
-  await page.getByLabel("Profile link").fill("https://evil.example/p/DevAlexM0rgn");
+  await page.getByLabel("Profile link").fill("https://example.com/not-a-profile");
   await page.getByRole("button", { name: "Open profile" }).click();
   await page.getByText("That isn't a Hi Again profile code or link.").waitFor();
-  await page.getByLabel("Profile link").fill(`${BASE}/p/DevAlexM0rgn`);
+  // A profile link from another address opens the profile here; it never navigates off-site.
+  await page.getByLabel("Profile link").fill("https://other.example/p/DevAlexM0rgn");
   await page.getByRole("button", { name: "Open profile" }).click();
   await page.waitForURL(`${BASE}/p/DevAlexM0rgn`);
 
@@ -143,12 +143,18 @@ async function run(width) {
 // In-app camera scanning, with Chromium's fake camera showing a real QR code.
 async function cameraCheck() {
   const results = [];
-  for (const [label, text, expectNav] of [
-    ["other QR", "https://example.com/not-hi-again", false],
-    ["Hi Again QR", `${BASE}/p/DevJamieChen`, true],
+  for (const [label, text, expectNav, opts] of [
+    ["other QR", "https://example.com/not-hi-again", false, {}],
+    ["Hi Again QR", `${BASE}/p/DevJamieChen`, true, {}],
+    // A phone held at arm's length: a small code in a high-definition frame.
+    ["small QR in HD frame", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 150 }],
+    // The whole viewfinder counts: a code right at the edge of the view.
+    ["QR at the edge of the view", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 240, at: "corner" }],
+    // A code made on another address of the app (e.g. a Vercel preview) still opens here.
+    ["QR from another Hi Again address", "https://hi-again-git-main-tek.vercel.app/p/DevJamieChen", true, {}],
   ]) {
-    const file = join(tmpdir(), `hiagain-qr-${expectNav ? "ok" : "other"}.y4m`);
-    await writeQrVideo(text, file);
+    const file = join(tmpdir(), `hiagain-qr-${label.replace(/\W+/g, "-")}.y4m`);
+    await writeQrVideo(text, file, opts);
     const b = await chromium.launch({ args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream", `--use-file-for-fake-video-capture=${file}`] });
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, permissions: ["camera"] });
     const page = await ctx.newPage();

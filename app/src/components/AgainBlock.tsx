@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getBrowserClient } from "@/lib/supabase/client";
 import { startLinkedInSignIn } from "@/lib/auth-client";
 import { GUEST_SCOPE } from "@/lib/core/guest";
@@ -30,6 +31,7 @@ interface Props {
  * both people see the match only when it's mutual. Either person can end a match.
  */
 export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, resume, signInAvailable }: Props) {
+  const router = useRouter();
   const [state, setState] = useState<AgainState>(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
     const row = Array.isArray(data) ? data[0] : null;
     if (e || !row) { setError("Couldn't update Again. Check your connection and try again."); return false; }
     setState(row.state);
+    router.refresh(); // Activity may now show a match
     return true;
   };
 
@@ -120,7 +123,7 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
                 setBusy(true);
                 const { data } = (await getBrowserClient()?.rpc("end_match", { p_public_id: publicId })) ?? { data: null };
                 setBusy(false);
-                if (data === "ended" || data === "not_found") { setState("none"); setConfirmEnd(false); setEnded(true); }
+                if (data === "ended" || data === "not_found") { setState("none"); setConfirmEnd(false); setEnded(true); router.refresh(); }
                 else setError("Couldn't end the match. Try again.");
               }}>End match</button>
             </div>

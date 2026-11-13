@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/data";
-import { getViewer } from "@/lib/supabase/server";
+import { getViewerId } from "@/lib/supabase/server";
 import { isFixtureMode } from "@/lib/config";
 import { FIXTURE_PROFILES, FIXTURE_OWNER_ID } from "@/lib/fixtures";
 import { profileUrl } from "@/lib/core/public-id";
@@ -22,7 +22,7 @@ export const metadata = { title: "My QR" };
 export default async function MyQrPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   let profile: { publicId: string; displayName: string; headline: string | null; linkedinUrl: string | null; avatarUrl: string | null };
-  let viewer = null;
+  let viewer: { userId: string; displayName: string } | null = null;
   const prompts: Record<ActionKind, string> = { join_me: "", question: "", feedback: "" };
   let calendar: CalendarState | null = null;
   let blocked: { publicId: string; displayName: string; avatarUrl: string | null }[] = [];
@@ -31,18 +31,23 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
     const f = FIXTURE_PROFILES.find((p) => p.publicId === FIXTURE_OWNER_ID)!;
     profile = f;
   } else {
-    viewer = await getViewer();
-    if (!viewer) redirect("/sign-in?next=/me");
-    const mine = await getMyProfile();
+    const viewerId = await getViewerId();
+    if (!viewerId) redirect("/sign-in?next=/me");
+    const supabase = (await createClient())!;
+    // Everything this page needs, fetched at the same time.
+    const [mine, { data: acts }, cal, { data: bl }] = await Promise.all([
+      getMyProfile(),
+      supabase.from("profile_actions").select("kind, prompt").eq("active", true),
+      getCalendarState(supabase),
+      supabase.rpc("my_blocked"),
+    ]);
     if (!mine) {
       return <p className="banner error" role="alert">We couldn&apos;t load your profile. Refresh to try again.</p>;
     }
     profile = mine;
-    const supabase = (await createClient())!;
-    const { data: acts } = await supabase.from("profile_actions").select("kind, prompt").eq("active", true);
+    viewer = { userId: viewerId, displayName: mine.displayName || "your account" };
     for (const a of acts ?? []) prompts[a.kind as ActionKind] = a.prompt;
-    calendar = await getCalendarState(supabase);
-    const { data: bl } = await supabase.rpc("my_blocked");
+    calendar = cal;
     blocked = ((bl as Array<Record<string, any>> | null) ?? []).map((b) => ({ publicId: b.public_id, displayName: b.display_name ?? "", avatarUrl: b.avatar_url }));
   }
 

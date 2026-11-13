@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import type { PublicAction, PublicProfile } from "@/lib/core/types";
 import { isValidPublicId } from "@/lib/core/public-id";
 import { isFixtureMode } from "@/lib/config";
@@ -6,7 +7,7 @@ import { FIXTURE_PROFILES } from "@/lib/fixtures";
 import { createClient } from "@/lib/supabase/server";
 
 /** Reads a public profile. Only the fields defined by get_public_profile() can be returned. */
-export async function getPublicProfile(publicId: string): Promise<PublicProfile | null> {
+export const getPublicProfile = cache(async (publicId: string): Promise<PublicProfile | null> => {
   if (!isValidPublicId(publicId)) return null;
   if (isFixtureMode) return FIXTURE_PROFILES.find((p) => p.publicId === publicId) ?? null;
   const supabase = await createClient();
@@ -22,7 +23,7 @@ export async function getPublicProfile(publicId: string): Promise<PublicProfile 
     linkedinUrl: (d.linkedinUrl as string | null) ?? null,
     actions: (d.actions as PublicAction[]) ?? [],
   };
-}
+});
 
 export interface MyProfile {
   publicId: string;

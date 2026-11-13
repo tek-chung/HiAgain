@@ -99,9 +99,10 @@ try {
     await r.getByText("Blocked. You won't see each other in Hi Again.").waitFor();
     assert.equal(await r.locator(".person", { hasText: "Jamie Chen" }).count(), 0);
     shot = k;
-    const res = await k.goto(`${BASE}/p/${robin}`);
-    assert.equal(res.status(), 404);
+    // With streamed loading states the status may be 200; what matters is the page content.
+    await k.goto(`${BASE}/p/${robin}`);
     await k.getByText("Profile not available").waitFor();
+    assert.equal(await k.getByRole("button", { name: /^Again/ }).count(), 0);
     assert.equal((await q("select count(*)::int n from public.blocks where blocker_id = $1 and blocked_id = $2", [ROBIN, "00000000-0000-4000-8000-0000000000b1"]))[0].n, 1);
     shot = r;
     await r.goto(`${BASE}/me`);

@@ -14,8 +14,12 @@ export function profileUrl(siteUrl: string, publicId: string): string {
   return new URL(profilePath(publicId), siteUrl.endsWith("/") ? siteUrl : siteUrl + "/").toString();
 }
 
-/** Extracts a public ID from a scanned/pasted Hi Again link, or a bare ID. Same-site only. */
-export function publicIdFromScan(text: string, siteUrl: string): string | null {
+/**
+ * Extracts a public ID from a scanned or pasted Hi Again link (any address of the app, e.g. a
+ * preview or custom domain), or a bare ID. Only the ID is used: the profile always opens on this
+ * site, so a code pointing elsewhere can't send anyone off-site.
+ */
+export function publicIdFromScan(text: string): string | null {
   const raw = text.trim();
   if (isValidPublicId(raw)) return raw;
   let u: URL;
@@ -24,8 +28,7 @@ export function publicIdFromScan(text: string, siteUrl: string): string | null {
   } catch {
     return null;
   }
-  const site = new URL(siteUrl);
-  if (u.host !== site.host) return null;
+  if (u.protocol !== "https:" && u.protocol !== "http:") return null;
   const m = /^\/p\/([A-Za-z0-9_-]{12})\/?$/.exec(u.pathname);
   return m ? m[1] : null;
 }

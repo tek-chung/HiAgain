@@ -21,7 +21,7 @@ for f in supabase/migrations/*.sql; do "${PSQL[@]}" -f "$f"; done
 "${PSQL[@]}" -f scripts/e2e-seed.sql
 
 export DATABASE_URL="postgres:///$DB?host=${PGHOST:-/var/run/postgresql}"
-STUB_PORT=$STUB_PORT node scripts/supabase-stub.mjs > /tmp/hiagain-stub.log 2>&1 & PIDS+=($!)
+STUB_PORT=$STUB_PORT STUB_LATENCY_MS=${STUB_LATENCY_MS:-0} node scripts/supabase-stub.mjs > /tmp/hiagain-stub.log 2>&1 & PIDS+=($!)
 
 export NEXT_DIST_DIR=.next-e2e NEXT_TELEMETRY_DISABLED=1
 export NEXT_PUBLIC_SUPABASE_URL="http://localhost:$STUB_PORT" NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="sb_publishable_test_only"
@@ -36,10 +36,7 @@ node node_modules/next/dist/bin/next start -p "$APP_PORT" > /tmp/hiagain-e2e-app
 for i in $(seq 1 30); do curl -sf "http://localhost:$APP_PORT/" >/dev/null && break; sleep 1; done
 
 export BASE_URL="http://localhost:$APP_PORT" STUB_URL="http://localhost:$STUB_PORT"
-node scripts/auth-errors-check.mjs
-node scripts/signed-in-check.mjs
-node scripts/calendar-check.mjs
-node scripts/activity-check.mjs
-node scripts/again-check.mjs
-node scripts/scans-check.mjs
-node scripts/avatar-check.mjs
+# CHECKS lets you run a subset, e.g. CHECKS="perf-check" STUB_LATENCY_MS=80 for a timing run.
+for c in ${CHECKS:-auth-errors-check signed-in-check calendar-check activity-check again-check scans-check avatar-check}; do
+  node "scripts/$c.mjs"
+done

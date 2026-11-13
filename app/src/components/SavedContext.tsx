@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 export interface EncounterContext { label: string; source: "calendar_auto" | "calendar_chosen" | "manual"; eventStart: string | null }
@@ -10,6 +11,7 @@ interface Candidate { label: string; start: string; allDay: boolean }
  * offered as a choice when several do, and always editable or removable in place.
  */
 export function SavedContext({ publicId, initial, dismissed }: { publicId: string; initial: EncounterContext | null; dismissed: boolean }) {
+  const router = useRouter();
   const [ctx, setCtx] = useState<EncounterContext | null>(initial);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [calStatus, setCalStatus] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export function SavedContext({ publicId, initial, dismissed }: { publicId: strin
     if (e || !row || row.status !== "saved") { setError("Couldn't save that. Try again."); return false; }
     setCtx(row.context_label ? { label: row.context_label, source: row.context_source, eventStart: row.context_event_start } : null);
     setCandidates([]);
+    router.refresh(); // People shows "Met at …"
     return true;
   };
 

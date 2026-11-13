@@ -119,7 +119,7 @@ export function ActivityList({ items: initial }: { items: ActivityItem[] }) {
                         c={toContribution(i)}
                         kind={i.kind as ActionKind}
                         notice={null}
-                        onUpdated={(c) => setItems((all) => all.map((x) => (x.id === c.id ? { ...x, body: c.body, version: c.version, editedAt: c.editedAt } : x)))}
+                        onUpdated={(c) => { setItems((all) => all.map((x) => (x.id === c.id ? { ...x, body: c.body, version: c.version, editedAt: c.editedAt } : x))); router.refresh(); }}
                       />
                     ) : (
                       <>

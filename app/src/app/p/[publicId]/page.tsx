@@ -20,10 +20,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Params) {
   const { publicId } = await params;
-  const profile = await getPublicProfile(publicId);
+  const [profile, viewer] = await Promise.all([getPublicProfile(publicId), getViewer()]);
   if (!profile) notFound();
 
-  const viewer = await getViewer();
   const isSelf = Boolean(viewer && viewer.publicId === profile.publicId);
   let initialSave: ServerSave | null = null;
   let contributions: Contribution[] = [];

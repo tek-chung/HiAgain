@@ -16,15 +16,15 @@ export function Shell({ children, signedIn, unread }: { children: React.ReactNod
       </header>
       <main>{children}</main>
       <nav className="nav" aria-label="Main">
-        <Link href="/people" aria-current={current("/people")}><PeopleIcon />People</Link>
-        <Link href="/activity" aria-current={current("/activity")} aria-label={unread ? `Activity, ${unread} unread` : "Activity"}>
+        <Link href="/people" prefetch aria-current={current("/people")}><PeopleIcon />People</Link>
+        <Link href="/activity" prefetch aria-current={current("/activity")} aria-label={unread ? `Activity, ${unread} unread` : "Activity"}>
           <span className="nav-icon">
             <ActivityIcon />
             {unread > 0 && <span className="nav-badge" aria-hidden="true">{unread > 99 ? "99+" : unread}</span>}
           </span>
           Activity
         </Link>
-        <Link href="/me" aria-current={current("/me")}><QrIcon />My QR</Link>
+        <Link href="/me" prefetch aria-current={current("/me")}><QrIcon />My QR</Link>
       </nav>
     </div>
   );

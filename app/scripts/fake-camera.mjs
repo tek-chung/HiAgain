@@ -4,10 +4,12 @@ import QRCode from "qrcode";
 import { PNG } from "pngjs";
 import { writeFileSync } from "node:fs";
 
-export async function writeQrVideo(text, path, { width = 640, height = 480, frames = 10 } = {}) {
-  const qr = PNG.sync.read(await QRCode.toBuffer(text, { margin: 2, width: 360, errorCorrectionLevel: "M" }));
+export async function writeQrVideo(text, path, { width = 640, height = 480, frames = 10, qrSize = 360, at = "centre" } = {}) {
+  const qr = PNG.sync.read(await QRCode.toBuffer(text, { margin: 2, width: qrSize, errorCorrectionLevel: "M" }));
   const rgb = new Uint8Array(width * height * 3).fill(235); // light grey "room"
-  const ox = Math.floor((width - qr.width) / 2), oy = Math.floor((height - qr.height) / 2);
+  // "centre", or "corner" to place the code near the top-left edge of the view.
+  const ox = at === "corner" ? 16 : Math.floor((width - qr.width) / 2);
+  const oy = at === "corner" ? 16 : Math.floor((height - qr.height) / 2);
   for (let y = 0; y < qr.height; y++) for (let x = 0; x < qr.width; x++) {
     const s = (y * qr.width + x) * 4, d = ((y + oy) * width + (x + ox)) * 3;
     rgb[d] = qr.data[s]; rgb[d + 1] = qr.data[s + 1]; rgb[d + 2] = qr.data[s + 2];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient, getViewer } from "@/lib/supabase/server";
+import { createClient, getViewerId } from "@/lib/supabase/server";
 import { isFixtureMode } from "@/lib/config";
 import { ActivityList, type ActivityItem } from "@/components/ActivityList";
 
@@ -7,8 +7,8 @@ export const metadata = { title: "Activity" };
 export const dynamic = "force-dynamic";
 
 export default async function ActivityPage() {
-  const viewer = await getViewer();
-  if (!viewer) {
+  const viewerId = await getViewerId();
+  if (!viewerId) {
     return (
       <section className="stack">
         <h1>Activity</h1>

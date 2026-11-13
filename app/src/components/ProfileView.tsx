@@ -69,6 +69,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
         return;
       }
       setSave({ kind: "saved", savedAt: row.saved_at, note: initialSave?.note ?? "", noteUpdatedAt: initialSave?.noteUpdatedAt ?? null, where: "account", isNew: row.status === "saved", archivedAt: null });
+      if (row.status === "saved") router.refresh(); // People now includes this person
       return;
     }
     try {
@@ -203,7 +204,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
       {!isSelf && save.kind === "saved" && save.archivedAt && (
         <div className="banner info small row spread" role="status">
           <span>In your Archive.</span>
-          <button className="btn small" onClick={async () => { if (await setArchivedState(false)) setSave({ ...save, archivedAt: null }); }}>Restore</button>
+          <button className="btn small" onClick={async () => { if (await setArchivedState(false)) { setSave({ ...save, archivedAt: null }); router.refresh(); } }}>Restore</button>
         </div>
       )}
 
@@ -233,7 +234,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
           open={open === a.id}
           onToggle={() => setOpen(open === a.id ? null : a.id)}
           initialDraft={resumeDraft?.actionId === a.id ? resumeDraft : null}
-          onSent={(c) => setSent((m) => ({ ...m, [a.id]: c }))}
+          onSent={(c) => { setSent((m) => ({ ...m, [a.id]: c })); router.refresh(); }}
         />
       ))}
 

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { publicIdFromScan } from "@/lib/core/public-id";
 
 // Built-in QR detection where the browser has it (Chrome on Android); otherwise jsQR decodes
@@ -22,9 +22,11 @@ export function Scanner() {
   const [hint, setHint] = useState<string | null>(null);
   const [paste, setPaste] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const debug = useSearchParams().get("debug") === "1";
+  const [diag, setDiag] = useState<string>("");
 
   const open = (text: string) => {
-    const id = publicIdFromScan(text, window.location.origin);
+    const id = publicIdFromScan(text);
     if (!id) return false;
     router.push(`/p/${id}`);
     return true;
@@ -43,7 +45,11 @@ export function Scanner() {
     (async () => {
       if (!navigator.mediaDevices?.getUserMedia) { setMode("unavailable"); return; }
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+        // Ask for HD: small codes on another phone's screen need the pixels.
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false,
+        });
       } catch (e) {
         const name = (e as { name?: string }).name;
         setMode(name === "NotAllowedError" || name === "SecurityError" ? "denied" : name === "NotReadableError" ? "busy" : "unavailable");
@@ -57,39 +63,60 @@ export function Scanner() {
       v.srcObject = stream;
       await v.play().catch(() => {});
       setMode("scanning");
+      // Continuous autofocus where the camera supports it (mostly Android).
+      try {
+        const track = stream.getVideoTracks()[0];
+        const caps = (track.getCapabilities?.() ?? {}) as { focusMode?: string[] };
+        if (caps.focusMode?.includes("continuous")) await track.applyConstraints({ advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet] });
+      } catch { /* not supported */ }
 
       let detector: Detector | null = null;
       try {
         const formats = (await window.BarcodeDetector?.getSupportedFormats?.()) ?? [];
         if (window.BarcodeDetector && formats.includes("qr_code")) detector = new window.BarcodeDetector({ formats: ["qr_code"] });
       } catch { detector = null; }
-      const jsQR = detector ? null : (await import("jsqr")).default;
+      // jsQR backs up the native detector too (some native detectors miss on-screen codes).
+      const jsQR = (await import("jsqr")).default;
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       let lastHint = 0;
+      let frame = 0;
+      let lastRead = "";
+
+      // The whole view is scanned. jsQR alternates between the full frame and a full-resolution
+      // look at the middle, which helps with small, distant codes; the native detector sees the full frame.
+      const decodeRegion = (centre: boolean): string | null => {
+        if (!jsQR || !ctx) return null;
+        const w = v.videoWidth, h = v.videoHeight;
+        let sx = 0, sy = 0, sw = w, sh = h;
+        if (centre) { const side = Math.round(Math.min(w, h) * 0.75); sx = Math.round((w - side) / 2); sy = Math.round((h - side) / 2); sw = sh = side; }
+        const scale = Math.min(1, (centre ? 800 : 960) / Math.max(sw, sh));
+        canvas.width = Math.round(sw * scale);
+        canvas.height = Math.round(sh * scale);
+        ctx.drawImage(v, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        return jsQR(img.data, img.width, img.height, { inversionAttempts: "attemptBoth" })?.data ?? null;
+      };
 
       const tick = async () => {
         if (stopped) return;
         if (v.readyState >= 2 && v.videoWidth) {
+          frame++;
           let found: string | null = null;
           try {
-            if (detector) {
-              found = (await detector.detect(v))[0]?.rawValue ?? null;
-            } else if (jsQR && ctx) {
-              const scale = Math.min(1, 640 / v.videoWidth);
-              canvas.width = Math.round(v.videoWidth * scale);
-              canvas.height = Math.round(v.videoHeight * scale);
-              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-              const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-              found = jsQR(img.data, img.width, img.height, { inversionAttempts: "attemptBoth" })?.data ?? null;
-            }
+            if (detector) found = (await detector.detect(v))[0]?.rawValue ?? null;
+            if (!found) found = decodeRegion(frame % 2 === 1);
           } catch { /* frame not ready */ }
           if (found) {
+            lastRead = found.slice(0, 80);
             if (open(found)) { stop(); return; }
             if (Date.now() - lastHint > 3000) { setHint("That QR code isn't a Hi Again profile."); lastHint = Date.now(); }
           }
+          if (debug && frame % 5 === 0) {
+            setDiag(`${detector ? "native" : "jsQR"} · ${v.videoWidth}×${v.videoHeight} · frames ${frame}${lastRead ? ` · read: ${lastRead}` : ""}`);
+          }
         }
-        timer = window.setTimeout(tick, 150);
+        timer = window.setTimeout(tick, 120);
       };
       void tick();
     })();
@@ -105,10 +132,10 @@ export function Scanner() {
     <div className="stack">
       <div className="scanner-frame" hidden={!live}>
         <video ref={video} className="scanner" playsInline muted autoPlay aria-label="Camera view" />
-        {mode === "scanning" && <div className="scanner-target" aria-hidden="true" />}
       </div>
       {mode === "starting" && <p className="muted small" role="status">Starting camera…</p>}
-      {mode === "scanning" && <p className="muted small" role="status">{hint ?? "Hold the QR code inside the square."}</p>}
+      {mode === "scanning" && <p className="muted small" role="status">{hint ?? "Point your camera at a Hi Again QR code — anywhere in view."}</p>}
+      {debug && <p className="small" style={{ fontFamily: "monospace" }} data-testid="scan-debug">{diag || "starting…"}</p>}
       {mode === "denied" && <p className="banner info small">Camera access is off. Allow it for this site in your browser settings, use your phone&apos;s camera app, or paste a link below.</p>}
       {mode === "busy" && <p className="banner info small">Another app is using the camera. Close it and reload, or paste a link below.</p>}
       {mode === "unavailable" && <p className="banner info small">This browser can&apos;t use the camera here. Use your phone&apos;s camera app to scan a Hi Again code, or paste a link below.</p>}

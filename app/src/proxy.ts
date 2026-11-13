@@ -34,8 +34,9 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  // Do not add logic between client creation and getUser(); it triggers the refresh.
-  await supabase.auth.getUser();
+  // Refreshes an expired session and verifies the token (locally, with asymmetric signing keys).
+  // Do not add logic between client creation and this call.
+  await supabase.auth.getClaims();
   return response;
 }
 

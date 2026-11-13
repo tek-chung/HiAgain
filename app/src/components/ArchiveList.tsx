@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { listGuestSaves, getGuestSave, putGuestSave } from "@/lib/guest-store";
 import { withArchived } from "@/lib/core/guest";
 import { getBrowserClient } from "@/lib/supabase/client";
@@ -11,6 +12,7 @@ export interface Archived { publicId: string; displayName: string; headline: str
 /** Archived people with one-tap Restore. Restoring returns them to their original date group. */
 export function ArchiveList({ accountArchived }: { accountArchived: Archived[] | null }) {
   const guest = accountArchived === null;
+  const router = useRouter();
   const [items, setItems] = useState<Archived[] | null>(accountArchived);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -38,6 +40,7 @@ export function ArchiveList({ accountArchived }: { accountArchived: Archived[] |
     if (!ok) { setMsg("Couldn't restore. Try again."); return; }
     setItems((list) => (list ?? []).filter((x) => x.publicId !== a.publicId));
     setMsg(`${a.displayName || "Person"} is back in People.`);
+    if (!guest) router.refresh();
   };
 
   if (!items) return <p className="muted small" role="status">Loading…</p>;

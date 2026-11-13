@@ -65,9 +65,12 @@ test("public IDs and scanned links", () => {
   assert.ok(!isValidPublicId("../../etc/pa"));
   const site = "https://hiagain.link";
   assert.equal(profileUrl(site, "Ab3_-xYz0123"), "https://hiagain.link/p/Ab3_-xYz0123");
-  assert.equal(publicIdFromScan("https://hiagain.link/p/Ab3_-xYz0123", site), "Ab3_-xYz0123");
-  assert.equal(publicIdFromScan("https://evil.link/p/Ab3_-xYz0123", site), null);
-  assert.equal(publicIdFromScan("Ab3_-xYz0123", site), "Ab3_-xYz0123");
+  assert.equal(publicIdFromScan("https://hiagain.link/p/Ab3_-xYz0123"), "Ab3_-xYz0123");
+  // Another address of the app (e.g. a Vercel preview) still works; only the ID is used locally.
+  assert.equal(publicIdFromScan("https://hi-again-git-main-tek.vercel.app/p/Ab3_-xYz0123/"), "Ab3_-xYz0123");
+  assert.equal(publicIdFromScan("https://example.com/somewhere-else"), null);
+  assert.equal(publicIdFromScan("javascript:alert(1)//p/Ab3_-xYz0123"), null);
+  assert.equal(publicIdFromScan("Ab3_-xYz0123"), "Ab3_-xYz0123");
 });
 
 test("character counting uses code points", () => {

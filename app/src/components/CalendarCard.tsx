@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Status = "unavailable" | "not_connected" | "connected" | "partial" | "needs_reconnect";
 interface Cal { id: string; summary: string; primary: boolean }
@@ -15,6 +16,7 @@ const OUTCOME_TEXT: Record<string, { tone: "" | "info" | "error"; text: string }
 
 /** Optional, separate Google Calendar connection, shown on My QR. */
 export function CalendarCard({ initialStatus, accountLabel, outcome }: { initialStatus: Status; accountLabel: string | null; outcome?: string }) {
+  const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [calendars, setCalendars] = useState<Cal[] | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
@@ -87,7 +89,7 @@ export function CalendarCard({ initialStatus, accountLabel, outcome }: { initial
               setBusy(true);
               const r = await fetch("/api/calendar", { method: "POST", body: JSON.stringify({ action: "disconnect" }) }).catch(() => null);
               setBusy(false);
-              if (r?.ok) { setStatus("not_connected"); setMessage(null); }
+              if (r?.ok) { setStatus("not_connected"); setMessage(null); router.refresh(); }
               else setMessage("Couldn't disconnect. Try again.");
             }}
           >

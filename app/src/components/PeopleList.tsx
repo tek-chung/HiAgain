@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SavedPerson } from "@/lib/core/types";
 import { groupByDay } from "@/lib/core/dates";
 import { withArchived } from "@/lib/core/guest";
@@ -14,6 +15,7 @@ type Person = SavedPerson & { context?: string | null; source?: string; guestId?
 export interface GuestVisitor { id: string; alias: string; firstAt: string }
 
 export function PeopleList({ accountSaves, guestVisitors = [], notice }: { accountSaves: Person[] | null; guestVisitors?: GuestVisitor[]; notice?: string | null }) {
+  const router = useRouter();
   const [people, setPeople] = useState<Person[] | null>(
     accountSaves ? [...accountSaves, ...guestVisitors.map(visitorToPerson)] : null,
   );
@@ -58,11 +60,13 @@ export function PeopleList({ accountSaves, guestVisitors = [], notice }: { accou
     if (!(await setArchived(p, true))) { setBanner({ text: "Couldn't archive. Try again." }); return; }
     setPeople((list) => (list ?? []).filter((x) => x.publicId !== p.publicId));
     setBanner({ text: `${p.displayName || "Person"} archived.`, undo: p });
+    if (!guest) router.refresh();
   };
   const undo = async (p: Person) => {
     if (!(await setArchived(p, false))) { setBanner({ text: "Couldn't undo. Restore from Archive instead." }); return; }
     setPeople((list) => [...(list ?? []), p]);
     setBanner(null);
+    if (!guest) router.refresh();
   };
 
   if (!people) return <p className="muted small" role="status">Loading…</p>;

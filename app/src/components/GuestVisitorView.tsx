@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { exactTimestamp } from "@/lib/core/dates";
 import { getBrowserClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
@@ -9,12 +10,13 @@ interface Props { id: string; alias: string; firstAt: string; note: string; note
 
 /** An anonymous guest who scanned your code. No profile, LinkedIn or Again — just when, and your notes. */
 export function GuestVisitorView({ id, alias, firstAt, note, noteUpdatedAt, archivedAt }: Props) {
+  const router = useRouter();
   const [archived, setArchived] = useState(Boolean(archivedAt));
   const [error, setError] = useState<string | null>(null);
 
   const toggleArchive = async () => {
     const { data } = (await getBrowserClient()?.rpc("set_guest_archived", { p_id: id, p_archived: !archived })) ?? { data: null };
-    if (data === "saved") setArchived(!archived);
+    if (data === "saved") { setArchived(!archived); router.refresh(); }
     else setError("Couldn't update. Try again.");
   };
 

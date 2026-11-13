@@ -9,7 +9,7 @@
 //
 // Usage: DATABASE_URL=postgres://... node scripts/supabase-stub.mjs   (listens on :54321)
 import http from "node:http";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createSign, generateKeyPairSync, randomBytes } from "node:crypto";
 import pg from "pg";
 
 const PORT = Number(process.env.STUB_PORT ?? 54321);
@@ -36,15 +36,33 @@ const gCalendars = [
 let gEvents = {}; // calendarId -> Google-format events
 const files = new Map(); // "bucket/path" -> { type, body } (object rows live in storage.objects, under RLS)
 
+// Asymmetric (ES256) access tokens with a JWKS endpoint, like current Supabase projects, so the app's
+// local token verification (auth.getClaims) is exercised. Test keys are generated per run.
+const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+const KID = "stub-" + randomBytes(4).toString("hex");
+const JWK = { ...publicKey.export({ format: "jwk" }), kid: KID, alg: "ES256", use: "sig", key_ops: ["verify"] };
 const b64url = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
-const makeJwt = (sub) => `${b64url({ alg: "HS256", typ: "JWT" })}.${b64url({ sub, role: "authenticated", aud: "authenticated", exp: Math.floor(Date.now() / 1000) + 3600, session_id: randomBytes(8).toString("hex") })}.stub`;
+function makeJwt(sub) {
+  const head = b64url({ alg: "ES256", typ: "JWT", kid: KID });
+  const body = b64url({ sub, role: "authenticated", aud: "authenticated", iss: `http://localhost:${PORT}/auth/v1`,
+    exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000), session_id: randomBytes(8).toString("hex") });
+  const sig = createSign("SHA256").update(`${head}.${body}`).sign({ key: privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url");
+  return `${head}.${body}.${sig}`;
+}
 function subFromAuth(req) {
   const m = /^Bearer (.+)$/.exec(req.headers.authorization ?? "");
   if (!m) return null;
   const parts = m[1].split(".");
-  if (parts.length !== 3 || parts[2] !== "stub") return null; // publishable key => anon
-  try { return JSON.parse(Buffer.from(parts[1], "base64url").toString()).sub ?? null; } catch { return null; }
+  if (parts.length !== 3) return null; // publishable key => anon
+  try {
+    if (JSON.parse(Buffer.from(parts[0], "base64url").toString()).kid !== KID) return null;
+    return JSON.parse(Buffer.from(parts[1], "base64url").toString()).sub ?? null;
+  } catch { return null; }
 }
+
+// Optional simulated network latency per request (e.g. STUB_LATENCY_MS=80 for US↔UK), and counters.
+const LATENCY = Number(process.env.STUB_LATENCY_MS ?? 0);
+const stats = new Map();
 
 async function asRole(sub, fn) {
   const c = await pool.connect();
@@ -87,6 +105,16 @@ async function isSetReturning(name) {
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
+  if (url.pathname === "/__test/stats") {
+    const body = Object.fromEntries(stats);
+    if (url.searchParams.get("reset")) stats.clear();
+    return send(res, 200, body);
+  }
+  if (!url.pathname.startsWith("/__") && !url.pathname.startsWith("/google/")) {
+    const key = `${req.method} ${url.pathname.replace(/\/storage\/v1\/object\/.*/, "/storage")}`;
+    stats.set(key, (stats.get(key) ?? 0) + 1);
+    if (LATENCY) await new Promise((r) => setTimeout(r, LATENCY));
+  }
   try {
     if (req.method === "OPTIONS") return send(res, 204);
 
@@ -228,6 +256,7 @@ http.createServer(async (req, res) => {
       const user = await userJson(uid);
       return send(res, 200, { access_token: makeJwt(uid), token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: randomBytes(16).toString("hex"), user });
     }
+    if (url.pathname === "/auth/v1/.well-known/jwks.json") return send(res, 200, { keys: [JWK] });
     if (url.pathname === "/auth/v1/user") {
       const sub = subFromAuth(req);
       const user = sub && (await userJson(sub));

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
-import { createClient, getViewer } from "@/lib/supabase/server";
+import { createClient, getViewerId } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: { default: "Hi Again", template: "%s · Hi Again" },
@@ -19,16 +19,16 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const viewer = await getViewer();
+  const viewerId = await getViewerId();
   let unread = 0;
-  if (viewer) {
+  if (viewerId) {
     const { data } = await (await createClient())!.rpc("unread_activity_count");
     unread = typeof data === "number" ? data : 0;
   }
   return (
     <html lang="en-GB">
       <body>
-        <Shell signedIn={Boolean(viewer)} unread={unread}>{children}</Shell>
+        <Shell signedIn={Boolean(viewerId)} unread={unread}>{children}</Shell>
       </body>
     </html>
   );

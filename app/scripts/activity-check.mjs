@@ -39,6 +39,7 @@ const badge = async () => {
   return (await b.count()) ? Number(await b.textContent()) : 0;
 };
 async function drag(locator, dx, dy = 0) {
+  await locator.waitFor(); // pages stream in after a loading placeholder
   const box = await locator.boundingBox();
   const x = box.x + box.width / 2, y = box.y + box.height / 2;
   await page.mouse.move(x, y);

@@ -1,4 +1,4 @@
-import { createClient, getViewer } from "@/lib/supabase/server";
+import { createClient, getViewer, getViewerId } from "@/lib/supabase/server";
 import type { SavedPerson } from "@/lib/core/types";
 import { PeopleList, type GuestVisitor } from "@/components/PeopleList";
 import { ImportPanel } from "@/components/ImportPanel";
@@ -9,12 +9,14 @@ export const dynamic = "force-dynamic";
 export default async function PeoplePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   let visitors: GuestVisitor[] = [];
-  const viewer = await getViewer();
+  const viewerId = await getViewerId();
   let saves: (SavedPerson & { context?: string | null; source?: string })[] | null = null;
   let loadError = false;
-  if (viewer) {
+  let viewer = null;
+  if (viewerId) {
     const supabase = (await createClient())!;
-    const [{ data, error }, { data: guests }] = await Promise.all([supabase.rpc("my_saved_people"), supabase.rpc("my_guest_encounters")]);
+    const [{ data, error }, { data: guests }, v] = await Promise.all([supabase.rpc("my_saved_people"), supabase.rpc("my_guest_encounters"), getViewer()]);
+    viewer = v;
     visitors = ((guests as Array<Record<string, any>> | null) ?? [])
       .filter((g) => !g.archived_at)
       .map((g) => ({ id: g.id, alias: g.alias, firstAt: g.first_at }));
