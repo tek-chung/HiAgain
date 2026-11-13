@@ -2,11 +2,15 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
 import { createClient, getViewerId } from "@/lib/supabase/server";
+import { configuredSiteUrl } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: { default: "Hi Again", template: "%s · Hi Again" },
   description: "Don't just meet. Meet again.",
   manifest: "/manifest.webmanifest",
+  // Lets link previews (WhatsApp, LinkedIn, iMessage) find the absolute image address.
+  metadataBase: new URL(configuredSiteUrl() ?? "https://hiagain.link"),
+  openGraph: { siteName: "Hi Again", type: "website" },
 };
 
 export const viewport: Viewport = {

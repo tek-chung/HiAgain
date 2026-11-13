@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { LogoMark } from "@/components/Logo";
 import { SignInButton } from "@/components/SignInButton";
 import { SignInProblem } from "@/components/SignInProblem";
 import { safeNextPath } from "@/lib/core/redirect";
@@ -13,6 +14,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   if (await getViewer()) redirect(next);
   return (
     <section className="stack">
+      <LogoMark size={64} title="" />
       <h1>Sign in</h1>
       <p className="muted">Use LinkedIn to get your Hi Again QR code straight away. You can edit your profile later.</p>
       {sp.signin === "cancelled" && <p className="banner info" role="status">Sign-in was cancelled. Nothing on this browser was lost.</p>}

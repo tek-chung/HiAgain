@@ -1,7 +1,7 @@
 # Hi Again project reference
 
 **Last updated:** 13 November 2026  
-**Version:** 1.69  
+**Version:** 1.70  
 **Stage:** Pilot app built and deployed; live verification in progress  
 **Owner:** Tek  
 **Purpose:** The living reference for Hi Again's product, decisions, reasoning, scope and unresolved questions. Read this before continuing project work and update it as decisions develop.
@@ -393,6 +393,8 @@ V reports a positive response to minimalist wireframes and adds a more concrete 
 
 **Logo exploration, 13 November 2026:** Tek requested a quick minimalist, friendly logo featuring a hand. Created a waving-hand and rounded-wordmark concept at `outputs/brand/hi-again-hand-concept-v1.png`. This is an exploratory asset, not an approved final identity; the monochrome treatment and smiling palm are design proposals.
 
+**Logos adopted, 14 November 2026 (confirmed by Tek):** Tek supplied two logos and asked for them to be used: a waving-hand mark with a smile, and the same hand beside a rounded “Hi Again” wordmark, both black on white. The originals and vector traces are in `brand/`. The app uses the wordmark in the header, the hand on the welcome and sign-in pages, and the hand for the browser tab icon, home-screen icons (white background) and link previews. Implementation choices (suggested, easy to change): near-black `#1d1d1b`, switching to near-white in dark mode; the app’s green palette is unchanged. Colour variants, minimum sizes and spacing rules remain open.
+
 The requested standalone hand and a simpler alternative without a face are saved as `outputs/brand/hi-again-hand-only-v1.png` and `outputs/brand/hi-again-hand-alternative-v1.png`. Both remain exploratory; no final selection made.
 
 ### 9.2 Agreed language
@@ -780,6 +782,7 @@ This reference records project decisions. Action recommendations in the source m
 | 14 November 2026 | 1.67 | Recorded profile photo upload and the CI workflow. No product decision changed. |
 | 14 November 2026 | 1.68 | Recorded Tek's decisions: hiagain.link is secured and will be used; name-based profile addresses from the LinkedIn name, numbered for duplicates, following name changes with redirects. Recorded the build. |
 | 14 November 2026 | 1.69 | Tidy-up: stage updated to “pilot app built and deployed”; domain rows merged (hiagain.link secured); section 11 summarised with links to the app README and verification record; open questions 13 and 14 brought up to date. No product decision changed. |
+| 14 November 2026 | 1.70 | Tek supplied the logos to use (hand mark and hand-plus-“Hi Again” wordmark); recorded them as the adopted identity and applied them across the app, icons and link previews. |
 
 | 13 November 2026 | 1.68 | Created the requested minimalist, friendly hand-logo concept; recorded it as exploratory rather than a final identity. |
 

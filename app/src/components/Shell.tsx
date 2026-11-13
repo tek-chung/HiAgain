@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoWordmark } from "./Logo";
 import { ActivityIcon, PeopleIcon, QrIcon, ScanIcon } from "./Icons";
 
 export function Shell({ children, signedIn, unread }: { children: React.ReactNode; signedIn: boolean; unread: number }) {
@@ -9,7 +10,7 @@ export function Shell({ children, signedIn, unread }: { children: React.ReactNod
   return (
     <div className="shell">
       <header className="top">
-        <Link href={signedIn ? "/me" : "/"} className="brand">Hi Again</Link>
+        <Link href={signedIn ? "/me" : "/"} className="brand" aria-label="Hi Again home"><LogoWordmark height={28} title="" /></Link>
         <Link href="/scan" className="btn icon-btn plain" aria-label="Scan a QR code" aria-current={current("/scan")}>
           <ScanIcon />
         </Link>

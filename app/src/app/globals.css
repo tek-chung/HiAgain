@@ -7,6 +7,7 @@
   --hs-muted: light-dark(#5d6d63, #b3c2b7);
   --hs-line: light-dark(#e0e7e1, #425047);
   --hs-soft: light-dark(#edf3ee, #303e35);
+  --hs-logo: light-dark(#1d1d1b, #f2f5f2);
   --hs-brand: light-dark(#28533e, #b5d9bd);
   --hs-onbrand: light-dark(#fff, #173122);
   --hs-green: light-dark(#eef6ed, #2c4333);
@@ -28,7 +29,8 @@ p { margin: .25rem 0 .75rem; }
 .shell { max-width: 480px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
 .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
   padding: .6rem 1rem; background: color-mix(in oklab, var(--hs-bg) 92%, transparent); backdrop-filter: blur(6px); }
-.brand { font-weight: 700; text-decoration: none; color: var(--hs-text); }
+.brand { display: inline-flex; align-items: center; text-decoration: none; color: var(--hs-logo); }
+.logo { color: var(--hs-logo); display: block; flex: none; }
 main { flex: 1; padding: .5rem 1rem 6rem; }
 .nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 0;
   background: var(--hs-paper); border-top: 1px solid var(--hs-line); padding-bottom: env(safe-area-inset-bottom); }
