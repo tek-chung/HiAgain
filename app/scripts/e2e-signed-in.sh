@@ -37,6 +37,6 @@ for i in $(seq 1 30); do curl -sf "http://localhost:$APP_PORT/" >/dev/null && br
 
 export BASE_URL="http://localhost:$APP_PORT" STUB_URL="http://localhost:$STUB_PORT"
 # CHECKS lets you run a subset, e.g. CHECKS="perf-check" STUB_LATENCY_MS=80 for a timing run.
-for c in ${CHECKS:-auth-errors-check signed-in-check calendar-check activity-check again-check scans-check avatar-check}; do
+for c in ${CHECKS:-auth-errors-check handles-check signed-in-check calendar-check activity-check again-check scans-check avatar-check}; do
   node "scripts/$c.mjs"
 done

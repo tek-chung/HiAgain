@@ -3,7 +3,7 @@ import { getMyProfile } from "@/lib/data";
 import { getViewerId } from "@/lib/supabase/server";
 import { isFixtureMode } from "@/lib/config";
 import { FIXTURE_PROFILES, FIXTURE_OWNER_ID } from "@/lib/fixtures";
-import { profileUrl } from "@/lib/core/public-id";
+import { shareUrl } from "@/lib/core/public-id";
 import { siteUrl } from "@/lib/site-url";
 import { qrSvg } from "@/lib/qr";
 import { Avatar, LinkedInLink } from "@/components/Avatar";
@@ -21,7 +21,7 @@ export const metadata = { title: "My QR" };
 
 export default async function MyQrPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  let profile: { publicId: string; displayName: string; headline: string | null; linkedinUrl: string | null; avatarUrl: string | null };
+  let profile: { publicId: string; handle: string | null; displayName: string; headline: string | null; linkedinUrl: string | null; avatarUrl: string | null };
   let viewer: { userId: string; displayName: string } | null = null;
   const prompts: Record<ActionKind, string> = { join_me: "", question: "", feedback: "" };
   let calendar: CalendarState | null = null;
@@ -51,7 +51,7 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
     blocked = ((bl as Array<Record<string, any>> | null) ?? []).map((b) => ({ publicId: b.public_id, displayName: b.display_name ?? "", avatarUrl: b.avatar_url }));
   }
 
-  const url = profileUrl(await siteUrl(), profile.publicId);
+  const url = shareUrl(await siteUrl(), profile);
   const svg = await qrSvg(url);
   const name = profile.displayName || "Your profile";
 
@@ -85,7 +85,7 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
           />
         )}
         {calendar && <CalendarCard initialStatus={calendar.status} accountLabel={calendar.accountLabel} outcome={sp.calendar} />}
-        <a className="btn full plain" href={`/p/${profile.publicId}`}>See what people see</a>
+        <a className="btn full plain" href={profile.handle ? `/${profile.handle}` : `/p/${profile.publicId}`}>See what people see</a>
         {viewer && <AccountSettings userId={viewer.userId} blocked={blocked} />}
         {viewer && <div style={{ textAlign: "center" }}><SignOutButton userId={viewer.userId} /></div>}
       </div>

@@ -65,4 +65,19 @@ fail=0; for p in "${pids[@]}"; do wait "$p" || fail=1; done
 MATCHES=$("${PSQL[@]}" -At -c "select count(*) from public.again_matches where user_a::text like '00000000-0000-4000-9000-%'")
 [ "$MATCHES" = 20 ] || { echo "concurrent Again: expected 20 matches, got $MATCHES"; exit 1; }
 echo "concurrency: 20 pairs pressing Again simultaneously -> $MATCHES matches (expected 20)"
+# Handles: 10 people called "Sam Smith" signing up at the same moment get 10 distinct links.
+"${PSQL[@]}" -c "insert into auth.users (id, raw_user_meta_data) select ('00000000-0000-4000-b000-' || lpad(g::text, 12, '0'))::uuid, '{\"name\":\"Sam Smith\"}' from generate_series(1, 10) g" >/dev/null
+pids=(); for g in $(seq 1 10); do
+  "${PSQL[@]}" -At >/dev/null <<SQL &
+begin; set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-$(printf %012d "$g")"}', true);
+select public.ensure_starter_profile();
+commit;
+SQL
+  pids+=($!); done
+fail=0; for p in "${pids[@]}"; do wait "$p" || fail=1; done
+[ "$fail" = 0 ] || { echo "concurrent handles: a worker failed"; exit 1; }
+DISTINCT=$("${PSQL[@]}" -At -c "select count(distinct handle) from public.profiles where user_id::text like '00000000-0000-4000-b000-%' and handle ~ '^sam-smith(-[0-9]+)?$'")
+[ "$DISTINCT" = 10 ] || { echo "concurrent handles: expected 10 distinct, got $DISTINCT"; exit 1; }
+echo "concurrency: 10 'Sam Smith' sign-ups at once -> $DISTINCT distinct links"
 echo "test-db: PASS"

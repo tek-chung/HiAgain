@@ -101,7 +101,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
   useEffect(() => {
     if (resumeId === AGAIN_INTENT) {
       // AgainBlock handles the intent; just tidy the URL once it has had a chance to read it.
-      const t = setTimeout(() => router.replace(`/p/${profile.publicId}`, { scroll: false }), 1500);
+      const t = setTimeout(() => router.replace(window.location.pathname, { scroll: false }), 1500);
       return () => clearTimeout(t);
     }
     if (!resumeId || !profile.actions.some((a) => a.id === resumeId)) return;
@@ -124,7 +124,7 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
         if (signin === "failed") setResumeNotice(`${explainSignInError(params.get("reason"), params.get("detail"))} Your draft is still here.`);
       }
       setOpen(resumeId);
-      router.replace(`/p/${profile.publicId}`, { scroll: false }); // keep the URL clean on refresh
+      router.replace(window.location.pathname, { scroll: false }); // keep the URL clean on refresh
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -370,7 +370,7 @@ function ActionCard({ action, ownerPublicId, scope, disabled, signedIn, signInAv
       setError("This browser can't keep your draft through sign-in. Copy your text first, then sign in.");
       return;
     }
-    const r = await startLinkedInSignIn(`/p/${ownerPublicId}?resume=${action.id}`);
+    const r = await startLinkedInSignIn(`${window.location.pathname}?resume=${action.id}`);
     if (!r.ok) setError(r.message);
   };
 

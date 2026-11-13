@@ -69,7 +69,7 @@ try {
     await page.waitForURL(`${BASE}/p/${alexId}`);
     await page.locator(".badge", { hasText: "Answered" }).waitFor();
     await page.getByText("How do you run customer interviews?").waitFor();
-    const rows = await q("select sender_id, body, kind from public.contributions");
+    const rows = await q("select sender_id, body, kind from public.contributions where sender_id = $1", [SAM]);
     assert.equal(rows.length, 1);
     assert.equal(rows[0].sender_id, SAM);
     assert.equal(rows[0].kind, "question");
@@ -78,7 +78,7 @@ try {
   await step("reload keeps one answer; a second answer is impossible", async () => {
     await page.reload();
     await page.locator(".badge", { hasText: "Answered" }).waitFor();
-    assert.equal((await q("select count(*)::int n from public.contributions"))[0].n, 1);
+    assert.equal((await q("select count(*)::int n from public.contributions where sender_id = $1", [SAM]))[0].n, 1);
   });
 
   await step("import guest saves: earliest time kept, empty note filled, conflict offered", async () => {
@@ -143,7 +143,8 @@ try {
       await c.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: JAMIE })]);
       assert.equal((await c.query("select count(*)::int n from public.contributions")).rows[0].n, 1, "Jamie reads only her own contribution");
       await c.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: ALEX })]);
-      assert.equal((await c.query("select count(*)::int n from public.contributions")).rows[0].n, 2, "Alex (recipient) reads both");
+      const all = (await q("select count(*)::int n from public.contributions where recipient_id = $1", [ALEX]))[0].n;
+      assert.equal((await c.query("select count(*)::int n from public.contributions")).rows[0].n, all, "Alex (recipient) reads everything sent to him");
       await c.query("rollback");
     } finally { c.release(); }
   });

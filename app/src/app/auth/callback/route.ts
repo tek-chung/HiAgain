@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/core/redirect";
+import { isValidHandle } from "@/lib/core/public-id";
 import { clampDetail, type SignInReason } from "@/lib/core/signin-errors";
 
 // OAuth return point. Exchanges the code (PKCE), creates the starter profile idempotently,
@@ -13,8 +14,10 @@ export async function GET(request: NextRequest) {
 
   const fail = (reason: SignInReason | "cancelled", detail?: string | null) => {
     // Profile pages keep the visitor's draft in view; everything else explains on the sign-in page.
-    const target = next.startsWith("/p/") ? new URL(next, origin) : new URL("/sign-in", origin);
-    if (!next.startsWith("/p/")) target.searchParams.set("next", next);
+    const firstSegment = next.split(/[/?#]/)[1] ?? "";
+    const onProfile = next.startsWith("/p/") || isValidHandle(firstSegment);
+    const target = onProfile ? new URL(next, origin) : new URL("/sign-in", origin);
+    if (!onProfile) target.searchParams.set("next", next);
     target.searchParams.set("signin", reason === "cancelled" ? "cancelled" : "failed");
     if (reason !== "cancelled") target.searchParams.set("reason", reason);
     const d = clampDetail(detail);

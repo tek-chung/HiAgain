@@ -25,7 +25,7 @@ try {
   await step("a broken code exchange is explained", async () => {
     await page.goto(`${BASE}/auth/callback?code=not-a-real-code&next=/me`);
     await page.waitForURL(/\/sign-in\?/);
-    await page.getByText("Sign-in finished on a different web address").waitFor();
+    await page.getByText("Sign-in came back in a different browser from the one it started in").waitFor();
   });
 
   await step("Supabase returning to the home page (Site URL fallback) still completes sign-in", async () => {

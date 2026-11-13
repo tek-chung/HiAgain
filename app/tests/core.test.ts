@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { groupLabel, groupByDay, exactTimestamp } from "../src/lib/core/dates.ts";
 import { normaliseLinkedInUrl } from "../src/lib/core/linkedin.ts";
 import { safeNextPath, withParam } from "../src/lib/core/redirect.ts";
-import { isValidPublicId, publicIdFromScan, profileUrl } from "../src/lib/core/public-id.ts";
+import { isValidPublicId, isValidHandle, profilePathFromScan, shareUrl } from "../src/lib/core/public-id.ts";
 import { countChars, countWords } from "../src/lib/core/limits.ts";
 
 // Friday 13 November 2026, 11:00 London (GMT)
@@ -59,18 +59,26 @@ test("post-sign-in redirects stay on this site", () => {
   assert.equal(withParam("/p/x?a=1", "signin", "cancelled"), "/p/x?a=1&signin=cancelled");
 });
 
-test("public IDs and scanned links", () => {
+test("public IDs, handles and scanned links", () => {
   assert.ok(isValidPublicId("Ab3_-xYz0123"));
   assert.ok(!isValidPublicId("short"));
   assert.ok(!isValidPublicId("../../etc/pa"));
-  const site = "https://hiagain.link";
-  assert.equal(profileUrl(site, "Ab3_-xYz0123"), "https://hiagain.link/p/Ab3_-xYz0123");
-  assert.equal(publicIdFromScan("https://hiagain.link/p/Ab3_-xYz0123"), "Ab3_-xYz0123");
-  // Another address of the app (e.g. a Vercel preview) still works; only the ID is used locally.
-  assert.equal(publicIdFromScan("https://hi-again-git-main-tek.vercel.app/p/Ab3_-xYz0123/"), "Ab3_-xYz0123");
-  assert.equal(publicIdFromScan("https://example.com/somewhere-else"), null);
-  assert.equal(publicIdFromScan("javascript:alert(1)//p/Ab3_-xYz0123"), null);
-  assert.equal(publicIdFromScan("Ab3_-xYz0123"), "Ab3_-xYz0123");
+  assert.ok(isValidHandle("tek-chung-2"));
+  for (const bad of ["Tek-Chung", "tek--chung", "-tek", "people", "me", "a".repeat(61), "tek_chung"]) assert.ok(!isValidHandle(bad), bad);
+  assert.equal(shareUrl("https://hiagain.link", { handle: "tek-chung", publicId: "Ab3_-xYz0123" }), "https://hiagain.link/tek-chung");
+  assert.equal(shareUrl("https://hiagain.link/", { handle: null, publicId: "Ab3_-xYz0123" }), "https://hiagain.link/p/Ab3_-xYz0123");
+  // Name links from Hi Again's own addresses
+  assert.equal(profilePathFromScan("https://hiagain.link/tek-chung"), "/tek-chung");
+  assert.equal(profilePathFromScan("https://www.hiagain.link/Tek-Chung/"), "/tek-chung");
+  assert.equal(profilePathFromScan("https://hi-again-chi.vercel.app/tek-chung"), "/tek-chung");
+  assert.equal(profilePathFromScan("https://preview.example/tek-chung", "preview.example"), "/tek-chung");
+  // …but not a single word on someone else's site
+  assert.equal(profilePathFromScan("https://shop.example/menu"), null);
+  assert.equal(profilePathFromScan("https://hiagain.link/people"), null, "app pages aren't profiles");
+  // Old ID links work from any address, always opened here
+  assert.equal(profilePathFromScan("https://hi-again-git-main-tek.vercel.app/p/Ab3_-xYz0123/"), "/p/Ab3_-xYz0123");
+  assert.equal(profilePathFromScan("Ab3_-xYz0123"), "/p/Ab3_-xYz0123");
+  assert.equal(profilePathFromScan("javascript:alert(1)//p/Ab3_-xYz0123"), null);
 });
 
 test("character counting uses code points", () => {

@@ -40,11 +40,13 @@ async function run(width) {
   const png = PNG.sync.read(await qr.screenshot());
   const code = jsQR(new Uint8ClampedArray(png.data), png.width, png.height);
   assert.ok(code, "QR decodes");
-  assert.equal(code.data, `${BASE}/p/DevAlexM0rgn`);
+  assert.equal(code.data, `${BASE}/alex-morgan`, "QR uses the name-based address");
+  await page.getByText(`${BASE}/alex-morgan`).waitFor();
   await shot("my-qr");
 
-  // 2. Guest scan: automatic save with honest wording
-  await page.goto(`${BASE}/p/DevJamieChen`);
+  // 2. Guest scan (via the name address): automatic save with honest wording
+  await page.goto(`${BASE}/Jamie-Chen`);
+  await page.waitForURL(`${BASE}/jamie-chen`); // capitalisation redirects to the canonical address
   await page.getByText("Saved on this browser. Sign in any time").waitFor();
   const stamp1 = await page.locator(".saved-context p").first().textContent();
   assert.match(stamp1, /^Saved \d{1,2} \w{3} \d{4}, \d{2}:\d{2} · this browser$/);
@@ -120,7 +122,7 @@ async function run(width) {
   await page.getByRole("button", { name: "Continue with LinkedIn" }).waitFor();
 
   // 11. Layout: no horizontal overflow; scan button top-right; tap targets ≥ 44px
-  for (const path of ["/me", "/people", "/p/DevAlexM0rgn", "/scan"]) {
+  for (const path of ["/me", "/people", "/p/DevAlexM0rgn", "/alex-morgan", "/scan"]) {
     await page.goto(`${BASE}${path}`);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     assert.ok(overflow <= 0, `${path} overflows by ${overflow}px at ${width}`);
@@ -145,7 +147,9 @@ async function cameraCheck() {
   const results = [];
   for (const [label, text, expectNav, opts] of [
     ["other QR", "https://example.com/not-hi-again", false, {}],
-    ["Hi Again QR", `${BASE}/p/DevJamieChen`, true, {}],
+    ["Hi Again QR (name address)", `${BASE}/jamie-chen`, true, {}],
+    ["Hi Again QR (older /p/ address)", `${BASE}/p/DevJamieChen`, true, {}],
+    ["name QR from hiagain.link", "https://hiagain.link/jamie-chen", true, {}],
     // A phone held at arm's length: a small code in a high-definition frame.
     ["small QR in HD frame", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 150 }],
     // The whole square viewfinder counts: a code in its corner, not just the middle.
@@ -163,7 +167,7 @@ async function cameraCheck() {
     const errors = []; page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(`${BASE}/scan`);
     if (expectNav) {
-      await page.waitForURL(`${BASE}/p/DevJamieChen`, { timeout: 15000 });
+      await page.waitForURL(new RegExp(`^${BASE}/(jamie-chen|p/DevJamieChen)$`), { timeout: 15000 });
       await page.getByRole("heading", { name: "Jamie Chen" }).waitFor();
     } else {
       await page.getByText("That QR code isn't a Hi Again profile.").waitFor({ timeout: 15000 });

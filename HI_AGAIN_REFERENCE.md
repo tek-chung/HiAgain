@@ -55,6 +55,8 @@ Tek confirmed these lines and automatic guest saving on 30 October 2026. On 13 N
 | Calendar disconnect | Deletes guessed “Likely met at” context; keeps context the person picked or typed. | Confirmed by Tek, 13 November 2026. |
 | Retention | Anonymous guest visits are kept for 12 months after the most recent visit; saves, notes and contributions stay until the person deletes their account. | Confirmed by Tek, 13 November 2026. No per-item deletion of sent contributions exists yet. |
 | Email notifications | None for the pilot; Activity (in-app badge) is the only notification. | Confirmed by Tek, 13 November 2026. |
+| Profile address | `hiagain.link/<name>` (e.g. `hiagain.link/tek-chung`), always from the person's LinkedIn name — not chosen by hand. Same names are numbered (`tek-chung-2`). A LinkedIn name change moves the address at the next sign-in; earlier addresses keep redirecting. Older `/p/<id>` links keep working. | Confirmed by Tek, 14 November 2026. |
+| Domain | `hiagain.link` is secured and will be the live domain. | Confirmed by Tek, 14 November 2026 (supersedes “purchase unconfirmed”). |
 | Interaction model | One-off event interest, answers and requests; view contributions in Hi Again and continue externally. | Recorded concept; detailed fulfilment and release boundary open; V |
 | Sender contribution access | Senders read/edit written content in place, both on the original submission view and through Activity → Sent. Sending changes the form to the saved contribution with inline Edit; the CTA becomes Save changes while editing. No separate confirmation, edit or save screen. Recipients see saved updates but cannot edit another person's text. | Confirmed read/edit, single-screen and no-confirmation-screen refinements; Tek, 31 October 2026. |
 | One answer per question | Each person can submit only one answer to the same question. Revisiting opens their existing answer for viewing/editing rather than another blank form. Identify questions by stable item ID, not wording or owner alone. | Confirmed once-per-person/question requirement; Tek, 31 October 2026. Prototype guard implemented; database uniqueness/concurrency enforcement still to build. |
@@ -772,6 +774,7 @@ This reference records project decisions. Action recommendations in the source m
 | 13 November 2026 | 1.65 | Recorded Tek's confirmation of the public-field allowlist, 2,000-character notes, calendar-disconnect rule and retention (guest visits 12 months; everything else until account deletion). Implemented guest-visit retention. |
 | 13 November 2026 | 1.66 | Recorded Tek's decision: no email notifications for the pilot. |
 | 14 November 2026 | 1.67 | Recorded profile photo upload and the CI workflow. No product decision changed. |
+| 14 November 2026 | 1.68 | Recorded Tek's decisions: hiagain.link is secured and will be used; name-based profile addresses from the LinkedIn name, numbered for duplicates, following name changes with redirects. Recorded the build. |
 
 | 13 November 2026 | 1.68 | Created the requested minimalist, friendly hand-logo concept; recorded it as exploratory rather than a final identity. |
 

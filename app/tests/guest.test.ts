@@ -7,7 +7,7 @@ import {
 import type { PublicProfile } from "../src/lib/core/types.ts";
 
 const profile: PublicProfile = {
-  publicId: "AAAAAAAAAAAA", displayName: "Alex Morgan", headline: "Product builder",
+  publicId: "AAAAAAAAAAAA", handle: "alex-morgan", displayName: "Alex Morgan", headline: "Product builder",
   avatarUrl: null, linkedinUrl: null, actions: [],
 };
 

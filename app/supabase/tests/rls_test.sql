@@ -73,7 +73,7 @@ declare j jsonb; keys text[];
 begin
   j := public.get_public_profile((select public_id from ids where who = 'a'));
   select array_agg(k order by k) into keys from jsonb_object_keys(j) k;
-  assert keys = array['actions','avatarUrl','displayName','headline','linkedinUrl','publicId'], 'allowlist: ' || keys::text;
+  assert keys = array['actions','avatarUrl','displayName','handle','headline','linkedinUrl','publicId'], 'allowlist: ' || keys::text;
   assert j::text !~ 'example.test', 'no email in public response';
   assert j::text !~ '00000000-0000-4000', 'no internal user id in public response';
   assert jsonb_array_length(j -> 'actions') = 3;

@@ -79,7 +79,7 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
       setError("This browser can't keep your choice through sign-in. Sign in first, then tap Again.");
       return;
     }
-    const r = await startLinkedInSignIn(`/p/${publicId}?resume=${AGAIN_INTENT}`);
+    const r = await startLinkedInSignIn(`${window.location.pathname}?resume=${AGAIN_INTENT}`);
     if (!r.ok) setError(r.message);
   };
 

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { publicIdFromScan } from "@/lib/core/public-id";
+import { profilePathFromScan } from "@/lib/core/public-id";
 
 // Built-in QR detection where the browser has it (Chrome on Android); otherwise jsQR decodes
 // camera frames in JavaScript (iPhone Safari, desktop). One <video> element is always mounted so
@@ -26,9 +26,9 @@ export function Scanner() {
   const [diag, setDiag] = useState<string>("");
 
   const open = (text: string) => {
-    const id = publicIdFromScan(text);
-    if (!id) return false;
-    router.push(`/p/${id}`);
+    const path = profilePathFromScan(text, window.location.host);
+    if (!path) return false;
+    router.push(path);
     return true;
   };
 

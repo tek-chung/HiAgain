@@ -23,6 +23,11 @@ With no Supabase settings the app runs in **development-fixture mode**: fictiona
 5. **Google Calendar (optional).** In Google Cloud Console: enable the Google Calendar API; configure the OAuth consent screen with the scopes `.../auth/calendar.calendarlist.readonly` and `.../auth/calendar.events.readonly`; create a *Web application* OAuth client with redirect URIs `http://localhost:3000/calendar/callback` and `https://<your-domain>/calendar/callback`. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `CALENDAR_TOKEN_KEY` (generate with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`). Calendar scopes count as sensitive, so Google limits an unverified app to test users you add, and refresh tokens for apps in *Testing* status expire after about 7 days. Plan Google's verification before a public pilot. Without these settings the Calendar card is hidden.
 6. Copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or the legacy anon key) and `NEXT_PUBLIC_SITE_URL`. Never add the service-role key: the app doesn't need it.
 
+**Custom domain (hiagain.link):**
+1. In Vercel → Settings → Domains, add `hiagain.link` and `www.hiagain.link`. Create the DNS records Vercel shows at your domain registrar, then set `www` to redirect to `hiagain.link`.
+2. Set `NEXT_PUBLIC_SITE_URL=https://hiagain.link` and redeploy, so QR codes always use it.
+3. In Supabase → Authentication → URL Configuration, set the Site URL to `https://hiagain.link` and add `https://hiagain.link/auth/callback` to Redirect URLs. The LinkedIn app is unaffected: it returns to Supabase.
+
 **Phones:** OAuth and camera both need HTTPS. Deploy a Vercel preview (set the same environment variables there) and use its URL as `NEXT_PUBLIC_SITE_URL`, so the QR codes point somewhere a phone can open.
 
 ## Commands
@@ -34,7 +39,7 @@ With no Supabase settings the app runs in **development-fixture mode**: fictiona
 | `npm test` | Unit tests for the pure logic (dates, LinkedIn links, redirects, import reconciliation, drafts) |
 | `npm run test:db` | Applies the migrations to a throwaway local Postgres and runs the access-control tests, including 8 concurrent imports and 20 pairs pressing Again simultaneously. Needs a local Postgres 15+ superuser. |
 | `npm run check:browser` | Playwright guest journey at 320px and 390px against a running fixture-mode server (`BASE_URL`, default `http://localhost:3000`) |
-| `npm run check:signed-in` | Signed-in, Calendar and Activity/Archive journeys end-to-end (56 steps): real migrations, a **test-only Supabase and Google stand-in** (`scripts/supabase-stub.mjs`, never deploy it), a production build and Playwright. Needs local Postgres. |
+| `npm run check:signed-in` | Signed-in, Calendar and Activity/Archive journeys end-to-end (64 steps): real migrations, a **test-only Supabase and Google stand-in** (`scripts/supabase-stub.mjs`, never deploy it), a production build and Playwright. Needs local Postgres. |
 
 Playwright needs a browser once: `npx playwright install chromium`.
 
@@ -77,6 +82,16 @@ scripts/               DB test runner, browser checks, test-only Supabase stub
 - **Delete account** requires typing DELETE. It revokes Google Calendar access, then deletes the account permanently. Everything cascades, including contributions sent to others, which disappear from their Activity. Reports keep their text without the identity.
 
 `delete_my_account()` deletes the caller's row in `auth.users` from a SECURITY DEFINER function. This is a common Supabase pattern, but confirm that your project's migration role has delete permission on `auth.users`.
+
+**Profile addresses.** Profiles live at `hiagain.link/<name>`, e.g. `hiagain.link/tek-chung`.
+- **Where the name comes from:** always the person's LinkedIn name, never chosen by hand. Accents are simplified and punctuation dropped.
+- **Same names:** numbered, e.g. `tek-chung-2`.
+- **No Latin letters in the name:** the address becomes `member-2` and so on.
+- **Reserved words:** app pages such as `/people` and `/me` are never used.
+- **Name changes:** if the LinkedIn name changes, the address follows at the next sign-in. Every earlier address stays reserved for that person and redirects, so printed QR codes never break.
+- **Older addresses:** `/p/<id>` addresses still work, and the app links between pages with them internally.
+- **Where it's set up:** migration `20261114120000_name_handles.sql`.
+- **Privacy:** name addresses can be guessed, so anyone can check whether someone has a profile. The profile itself was already public.
 
 **Photos.** Add, change or remove a photo under Edit profile. It's saved straight away. The browser crops it to a 512×512 JPEG, which also drops location and other EXIF data, then uploads it to Supabase Storage at `avatars/<your user id>/`. The bucket is public, because the photo is a public profile field, and limited to 1 MB of JPEG, PNG or WebP. Storage policies allow writing only in your own folder. The database accepts only an avatar URL inside your own folder, so a profile can't point at an outside or tracking image. Older photos are deleted when you change or remove yours, and all of them when you delete your account. Migration `20261114090000_avatars.sql` creates the bucket and policies.
 

@@ -6,6 +6,7 @@ export const FIXTURE_OWNER_ID = "DevAlexM0rgn";
 export const FIXTURE_PROFILES: PublicProfile[] = [
   {
     publicId: FIXTURE_OWNER_ID,
+    handle: "alex-morgan",
     displayName: "Alex Morgan",
     headline: "Product builder · London",
     avatarUrl: null,
@@ -18,6 +19,7 @@ export const FIXTURE_PROFILES: PublicProfile[] = [
   },
   {
     publicId: "DevJamieChen",
+    handle: "jamie-chen",
     displayName: "Jamie Chen",
     headline: "Product designer · London",
     avatarUrl: null,
@@ -29,6 +31,7 @@ export const FIXTURE_PROFILES: PublicProfile[] = [
   },
   {
     publicId: "DevSamPatel1",
+    handle: "sam-patel",
     displayName: "Sam Patel",
     headline: null,
     avatarUrl: null,

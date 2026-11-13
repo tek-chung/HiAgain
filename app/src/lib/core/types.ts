@@ -9,6 +9,8 @@ export interface PublicAction {
 /** The complete set of fields a public profile response may contain (provisional allowlist). */
 export interface PublicProfile {
   publicId: string;
+  /** Name-based address, e.g. "tek-chung" for hiagain.link/tek-chung. */
+  handle: string | null;
   displayName: string;
   headline: string | null;
   avatarUrl: string | null;
