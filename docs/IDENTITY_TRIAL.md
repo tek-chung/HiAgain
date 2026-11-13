@@ -1,5 +1,7 @@
 # First working integration trial
 
+**Status, 14 November 2026:** Automated versions of these checks pass (`app/VERIFICATION.md`); the live trial is in progress — LinkedIn sign-in has worked on Android.
+
 **Current provider decision, 13 November 2026 (reference v1.58):** LinkedIn is the sole launch sign-in provider. Connect Google Calendar separately after sign-in, with an optional read-only grant. First sign-in opens a usable QR or resumes the interrupted action. Provider configuration and real-device verification are pending.
 
 **Date:** 31 October 2026  

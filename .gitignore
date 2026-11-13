@@ -22,3 +22,6 @@ experiments/linkedin-search/verification/browser-profile/
 
 # The published mock-up has its own git repository; outputs/hi-again-mockup.html is the tracked copy
 sites/
+
+# Files the Claude desktop app saves from chat downloads
+Claude outputs/

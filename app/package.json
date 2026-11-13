@@ -15,7 +15,8 @@
     "test:db": "bash scripts/test-db.sh",
     "verify": "npm run typecheck && npm test",
     "check:browser": "node scripts/browser-check.mjs",
-    "check:signed-in": "bash scripts/e2e-signed-in.sh"
+    "check:signed-in": "bash scripts/e2e-signed-in.sh",
+    "check:perf": "CHECKS=perf-check STUB_LATENCY_MS=80 bash scripts/e2e-signed-in.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

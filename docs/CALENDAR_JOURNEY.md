@@ -1,5 +1,7 @@
 # Calendar integration journey
 
+**Status, 14 November 2026:** Built as designed in `app/` (separate read-only Google connection, “Likely met at”, overlap choice, manual fallback, Join me ideas). Not yet tried with a real Google OAuth client.
+
 **Designed:** 1 November 2026. Proposed interaction design for review; calendar context and Join me suggestions are confirmed product scope. Provider permissions, matching thresholds and retention require implementation validation. The mock-up uses fictional events and simulated permission; no calendar account is accessed.
 
 ## Connect Google Calendar after LinkedIn sign-in

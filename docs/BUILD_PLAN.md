@@ -1,5 +1,7 @@
 # Hi Again build plan
 
+**Status, 14 November 2026:** Historical plan. Milestones 0–4 are built in `app/` and the pilot app is deployed; see [`app/README.md`](../app/README.md) and [the implementation log](IMPLEMENTATION_LOG.md). Proposed defaults below were later confirmed or replaced — the reference holds the current decisions.
+
 **Current provider decision, 13 November 2026 (reference v1.58):** LinkedIn is the sole launch sign-in provider. Connect Google Calendar separately after sign-in, with an optional read-only grant. First sign-in opens a usable QR or resumes the interrupted action. Provider configuration and real-device verification are pending.
 
 **Date:** 31 October 2026  

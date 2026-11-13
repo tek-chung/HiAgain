@@ -1,5 +1,7 @@
 # Agreed MVP architecture
 
+**Status, 14 November 2026:** Implemented as described (Next.js 16 on Vercel in London, Supabase Auth/Postgres/Storage, IndexedDB for guests). Statements below that nothing was implemented are historical; see [`app/README.md`](../app/README.md).
+
 **Current provider decision, 13 November 2026 (reference v1.58):** LinkedIn is the sole launch sign-in provider. Connect Google Calendar separately after sign-in, with an optional read-only grant. First sign-in opens a usable QR or resumes the interrupted action. Provider configuration and real-device verification are pending.
 
 **Date:** 31 October 2026  

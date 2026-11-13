@@ -1,5 +1,7 @@
 # Hi Again build handover
 
+**Status, 14 November 2026:** Historical handover — this guided the first build, which is now complete and deployed. Start with [`app/README.md`](../app/README.md) and [the reference](../HI_AGAIN_REFERENCE.md).
+
 **Prepared 13 November 2026.** Hi Again helps people turn a first meeting into a second interaction. Start with people who already use LinkedIn and scan QR codes at professional events.
 
 ## Start here

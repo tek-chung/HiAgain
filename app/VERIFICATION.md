@@ -1,6 +1,17 @@
-# Verification record — first milestone
+# Verification record
 
-**Date:** 13 November 2026 · **Environment:** cloud build sandbox, Node 22.23, Next.js 16.4.6, PostgreSQL 16.15, Playwright 1.63 (Chromium), fictional data only.
+**Last run:** 14 November 2026 · **Environment:** cloud build sandbox, Node 22.23, Next.js 16.4.6, PostgreSQL 16.15, Playwright 1.63 (Chromium), fictional data only.
+
+**Summary:**
+- Typecheck and build pass.
+- 19/19 unit tests pass.
+- All database suites pass, including the race tests.
+- The guest journey passes at 320px and 390px.
+- 9 camera-scanning cases pass.
+- 64/64 signed-in journeys pass.
+- Tab switches take 40–75 ms with simulated distance.
+
+The first section below lists automated evidence. The last two cover what Tek has tried on the live site and what is still unverified.
 
 ## Passed
 
@@ -35,13 +46,18 @@
 
 The signed-in run found and fixed a real defect: the browser's built-in URL validation blocked LinkedIn links pasted without `https://`. Those fields now use the app's own validation. The Activity checks caught a second defect: the Activity icon and label sat side by side instead of stacked and centred. The scans check caught a third: a "Guest" or "Scanned you" label stretched onto its own full-width line in People.
 
-## Not yet verified (needs credentials or devices)
+## Tried on the live deployment (Tek, Android, 13–14 November 2026)
 
-- **Real LinkedIn OIDC through Supabase.** The stand-in reproduces Supabase's PKCE code flow and REST shapes but not LinkedIn's consent screens, Supabase's token signing or refresh, or real cookie sizes. Needs the LinkedIn developer app and a Supabase project.
-- **Real Supabase/PostgREST.** The migrations run on Postgres 16 with a stand-in `auth` schema. Applying them to a hosted Supabase project hasn't been done.
-- **Phones.** iPhone/Safari and Android/Chrome camera scans, OAuth hand-off from a camera-opened page, in-app browsers, and IndexedDB behaviour in private mode. Needs an HTTPS preview URL.
-- **Real Google Calendar.** Google's real consent screen, granular-permission behaviour, unverified-app limits and 7-day testing-mode token expiry haven't been exercised. That needs a Google Cloud OAuth client.
-- **GitHub Actions workflow.** Written but not yet run on GitHub.
-- **Photo upload from iPhone and Android** (HEIC conversion, camera capture). Tested in desktop Chromium with generated images.
-- **Real touch swipes on phones.** Swipes were tested with mouse-pointer drags in Chromium, not finger touches on iOS or Android.
-- **Accessibility** with screen readers; only structure, labels and target sizes were checked.
+- **LinkedIn sign-in through Supabase on Vercel:** reached the final step once the settings were corrected. A failure after approving in the LinkedIn app ("came back in a different browser") is now explained on screen, and retrying in the same browser fixes it.
+- **In-app camera:** shows the live feed after the black-screen fix. Reading codes on the phone still needs confirming with the latest build.
+- **Phone camera apps:** they decode the profile link. Xiaomi's scanner showed a `vercel.app` link as plain text; the `hiagain.link` domain is expected to avoid that.
+
+## Not yet verified
+
+- **Real Supabase/PostgREST at scale:** only basic live use so far. The full access-control suite has been run on local Postgres, not on the hosted project.
+- **Account deletion on the hosted project:** it needs the database role to be able to delete from `auth.users`. Check once with a throwaway account.
+- **LinkedIn name changes:** that Supabase refreshes the LinkedIn name in user metadata at each sign-in, which a profile address following a name change relies on.
+- **Real Google Calendar:** Google's real consent screen, granular-permission behaviour, unverified-app limits and 7-day testing-mode token expiry. Needs a Google Cloud OAuth client.
+- **GitHub Actions workflow:** runs on the next push that touches `app/`. Check the first run.
+- **Phones in general:** iPhone Safari end to end, in-app browsers, photo upload from phones (HEIC conversion, camera capture), real touch swipes, and QR reading in real lighting.
+- **Accessibility with screen readers:** only structure, labels and tap-target sizes were checked.

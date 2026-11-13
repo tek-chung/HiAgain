@@ -1,5 +1,7 @@
 # Hi Again interactive journey concept
 
+**Status, 14 November 2026:** Historical. The mock-up guided the build; the live app in `app/` is now the reference for behaviour.
+
 **Current showcase access, 1 November 2026:** The [existing mock-up](https://hi-again-journey-demo.woollysnipe13.chatgpt.site) is now public for Tek to share with a friend (Sites access revision 2). A matching standalone HTML export is at `outputs/hi-again-mockup.html`. This supersedes the earlier owner-private access descriptions below. The prototype simulates LinkedIn sign-in followed by optional Google Calendar connection. No real accounts/calendar access or messages are involved.
 
 Verified with an unauthenticated HTTP request: status 200, unchanged Site URL and the mock-up document present, without a sign-in redirect.

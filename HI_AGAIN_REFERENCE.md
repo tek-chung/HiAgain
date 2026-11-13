@@ -2,7 +2,7 @@
 
 **Last updated:** 13 November 2026  
 **Version:** 1.69  
-**Stage:** Concept definition and MVP planning  
+**Stage:** Pilot app built and deployed; live verification in progress  
 **Owner:** Tek  
 **Purpose:** The living reference for Hi Again's product, decisions, reasoning, scope and unresolved questions. Read this before continuing project work and update it as decisions develop.
 
@@ -41,7 +41,7 @@ Tek confirmed these lines and automatic guest saving on 30 October 2026. On 13 N
 | Working brand | Hi Again remains the preferred name despite unresolved naming overlap. | Provisional brand choice; N |
 | Main brand line | **Don't just meet. Meet again.** | Confirmed; C |
 | Product promise | **Make the second interaction happen.** | Confirmed; C |
-| Preferred domain | `hiagain.link`, ahead of `hi-again.link`. Purchase is unconfirmed. | Preference confirmed; N |
+| Domain | `hiagain.link` is secured and is the live domain, chosen ahead of `hi-again.link`. | Preference confirmed (N); secured, Tek, 14 November 2026. |
 | Launch sign-in | **LinkedIn only at launch.** Connect Google Calendar separately after sign-in. | Confirmed by Tek, 13 November 2026. Supersedes the 1 November Google-only sign-in and first-login calendar request. |
 | Public profile access | A QR profile can be viewed without signing in. | Confirmed; P, A |
 | Scan behaviour | **Automatically save profiles for both guests and signed-in visitors. Sign-in can follow later.** | Confirmed; C |
@@ -56,7 +56,6 @@ Tek confirmed these lines and automatic guest saving on 30 October 2026. On 13 N
 | Retention | Anonymous guest visits are kept for 12 months after the most recent visit; saves, notes and contributions stay until the person deletes their account. | Confirmed by Tek, 13 November 2026. No per-item deletion of sent contributions exists yet. |
 | Email notifications | None for the pilot; Activity (in-app badge) is the only notification. | Confirmed by Tek, 13 November 2026. |
 | Profile address | `hiagain.link/<name>` (e.g. `hiagain.link/tek-chung`), always from the person's LinkedIn name — not chosen by hand. Same names are numbered (`tek-chung-2`). A LinkedIn name change moves the address at the next sign-in; earlier addresses keep redirecting. Older `/p/<id>` links keep working. | Confirmed by Tek, 14 November 2026. |
-| Domain | `hiagain.link` is secured and will be the live domain. | Confirmed by Tek, 14 November 2026 (supersedes “purchase unconfirmed”). |
 | Interaction model | One-off event interest, answers and requests; view contributions in Hi Again and continue externally. | Recorded concept; detailed fulfilment and release boundary open; V |
 | Sender contribution access | Senders read/edit written content in place, both on the original submission view and through Activity → Sent. Sending changes the form to the saved contribution with inline Edit; the CTA becomes Save changes while editing. No separate confirmation, edit or save screen. Recipients see saved updates but cannot edit another person's text. | Confirmed read/edit, single-screen and no-confirmation-screen refinements; Tek, 31 October 2026. |
 | One answer per question | Each person can submit only one answer to the same question. Revisiting opens their existing answer for viewing/editing rather than another blank form. Identify questions by stable item ID, not wording or owner alone. | Confirmed once-per-person/question requirement; Tek, 31 October 2026. Prototype guard implemented; database uniqueness/concurrency enforcement still to build. |
@@ -432,7 +431,9 @@ Additional exploratory names: **Folo, Follo, FollowOn, Relay, Loop, Mesh, Nodi, 
 
 **`hiagain.link` is preferred** because it is cleaner and easier to communicate. A profile address such as `hiagain.link/tek` was an illustration, not a confirmed URL scheme or live page. [N]
 
-A user-supplied Cloudflare screenshot was recorded as displaying **US$7.20 per year for registration and renewal**. This is a historical observation; availability, current pricing, ownership and purchase have not been verified in this consolidation. The preference is not purchase authorisation. [N]
+A user-supplied Cloudflare screenshot was recorded as displaying **US$7.20 per year for registration and renewal** (historical observation). [N]
+
+**Update, 14 November 2026:** Tek has secured `hiagain.link` and is moving the live app to it. Profile addresses use the form `hiagain.link/<name>`, taken from the LinkedIn name (see section 1).
 
 ### 9.5 Trademark and existing-brand research
 
@@ -548,11 +549,14 @@ These sources do not justify estimating the target audience's exact provider per
 
 ### 11.1 Current concept state
 
-The product thesis, brand lines, action-led participation mechanisms, private mutual Again, automatic guest/member saving, LinkedIn-only launch sign-in and separate optional Google Calendar access are recorded. The provider split still needs real integration verification.
+The product thesis, brand lines, action-led participation, private mutual Again, automatic guest/member saving, LinkedIn-only sign-in and separate optional Google Calendar access are recorded and built. The pilot app is deployed on Vercel with Supabase; live verification is in progress.
 
 ### 11.2 Implementation state
 
-- **Production application:** in `app/`. Built (13 November 2026): the whole first milestone — LinkedIn OIDC sign-in, immediate QR, guest saves/notes/drafts with retry-safe import and note-conflict choice, draft resumed and sent after sign-in, and the separate optional read-only Google Calendar connection (private “Likely met at” context, choice for overlaps, manual fallback, owner-confirmed Join me ideas); owner-editable invitations; sender in-place editing; Activity (Received/Sent, icon badge, per-version read state, Mark all as read); People Archive/Restore with left-LinkedIn/right-archive swipes; Again with private one-sided signals, transactional mutual matching, Coffee/Walk/Call next steps and match ending; incoming scans with the scanner notice and anonymous guest nicknames; blocking, reporting and permanent account deletion. Verified locally with fictional data (unit, database access-control and concurrency, browser checks, and 56 signed-in/Calendar/Activity/Again/scans/blocking/photo journeys against a test-only Supabase and Google stand-in); see `app/VERIFICATION.md`. Not yet verified with a real LinkedIn app, hosted Supabase, a Google OAuth client, Vercel or phones. The public-field allowlist, note length, calendar-disconnect and retention rules were confirmed on 13 November 2026 and are implemented (12-month guest-visit retention added). Profile photo upload added (own-folder Supabase Storage, 512px JPEG). Email notifications are not part of the pilot (Tek, 13 November 2026). A GitHub Actions workflow runs all checks on push (not yet run on GitHub).
+- **Production application:** built and deployed (`app/`, Next.js 16 on Vercel, Supabase in London). Setup, features and confirmed rules: [`app/README.md`](app/README.md); test evidence and what is still unverified: [`app/VERIFICATION.md`](app/VERIFICATION.md).
+  - **Built:** LinkedIn sign-in with immediate QR; name-based profile addresses; guest saves, notes and drafts with retry-safe import; the three actions with sender editing; Activity with unread state; People with Archive and swipes; Again; incoming scans with scanner notice; optional Google Calendar context and Join me ideas; photo upload; blocking, reporting and account deletion; 12-month guest-visit retention.
+  - **Live so far (Tek, Android):** LinkedIn sign-in reached completion; in-app camera shows its feed; phone camera apps decode the profile link.
+  - **Not built, by decision:** email notifications (none for the pilot).
 - **Interactive mock-up:** fictional, simulated services. Standalone [HTML](outputs/hi-again-mockup.html), identical to `sites/hi-again-mockup/dist/index.html`, publicly viewable at https://hi-again-journey-demo.woollysnipe13.chatgpt.site. It shows LinkedIn sign-in followed by an optional Google Calendar connection.
 - **Deferred experiment:** LinkedIn search-and-confirm in `experiments/linkedin-search/` (back pocket, not in scope).
 - **Detailed history:** every dated mock-up revision, hosting change and local verification result is kept in the [implementation log](docs/IMPLEMENTATION_LOG.md). Add new implementation entries there and keep this summary current.
@@ -648,8 +652,8 @@ The order below is a suggested sequence based on dependencies in the concept, no
 | 10 | How do permanent profile URLs, QR rotation, repeat scans and the confirmed scanner entry work? | Defines capture reliability, permission/fallback handling and access behaviour. |
 | 11 | Should people be able to delete individual sent contributions or saved people? | Blocking, deletion, Again lifecycle and retention were decided on 13 November 2026; today only account deletion removes sent items, and People offers Archive rather than removal. |
 | 12 | How are LinkedIn URLs entered, validated and updated? | The launch integration does not supply automatic URL discovery. |
-| 13 | Are the selected stack's provider requirements, deployment configuration and device behaviours verified? | Architecture is adopted; LinkedIn access, integrations, privacy and mobile behaviour still need implementation evidence. |
-| 14 | What is the domain ownership and brand-clearance position? | Resolves the provisional public identity before material brand commitments. |
+| 13 | Do the live services and phones behave as tested? | The app is deployed and LinkedIn sign-in has worked live on Android; Google Calendar, iPhone end to end, account deletion on the hosted database and phone QR reading still need confirming (see `app/VERIFICATION.md`). |
+| 14 | What is the brand-clearance position? | `hiagain.link` is secured (14 November 2026); trademark and existing-brand clearance remain open before material brand commitments. |
 | 15 | What counts as a meaningful second interaction and how will the pilot observe it? | Measures the product outcome beyond contacts, button presses or mutual matches. |
 
 The first eight questions derive from outstanding decisions in V, with sign-in timing explicit from its act-first journey. Preserve the settled private mutual-interest rule, participation mechanisms and removal of general connection requests. The old three-Share product framing has since been retired; use the current action-led direction throughout the UI.
@@ -775,6 +779,7 @@ This reference records project decisions. Action recommendations in the source m
 | 13 November 2026 | 1.66 | Recorded Tek's decision: no email notifications for the pilot. |
 | 14 November 2026 | 1.67 | Recorded profile photo upload and the CI workflow. No product decision changed. |
 | 14 November 2026 | 1.68 | Recorded Tek's decisions: hiagain.link is secured and will be used; name-based profile addresses from the LinkedIn name, numbered for duplicates, following name changes with redirects. Recorded the build. |
+| 14 November 2026 | 1.69 | Tidy-up: stage updated to “pilot app built and deployed”; domain rows merged (hiagain.link secured); section 11 summarised with links to the app README and verification record; open questions 13 and 14 brought up to date. No product decision changed. |
 
 | 13 November 2026 | 1.68 | Created the requested minimalist, friendly hand-logo concept; recorded it as exploratory rather than a final identity. |
 
