@@ -6,6 +6,9 @@ import jsQR from "jsqr";
 import { PNG } from "pngjs";
 import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { writeQrVideo } from "./fake-camera.mjs";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const SHOTS = process.env.SHOTS_DIR;
@@ -137,7 +140,46 @@ async function run(width) {
   await ctx.close();
 }
 
+// In-app camera scanning, with Chromium's fake camera showing a real QR code.
+async function cameraCheck() {
+  const results = [];
+  for (const [label, text, expectNav] of [
+    ["other QR", "https://example.com/not-hi-again", false],
+    ["Hi Again QR", `${BASE}/p/DevJamieChen`, true],
+  ]) {
+    const file = join(tmpdir(), `hiagain-qr-${expectNav ? "ok" : "other"}.y4m`);
+    await writeQrVideo(text, file);
+    const b = await chromium.launch({ args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream", `--use-file-for-fake-video-capture=${file}`] });
+    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, permissions: ["camera"] });
+    const page = await ctx.newPage();
+    const errors = []; page.on("pageerror", (e) => errors.push(e.message));
+    await page.goto(`${BASE}/scan`);
+    if (expectNav) {
+      await page.waitForURL(`${BASE}/p/DevJamieChen`, { timeout: 15000 });
+      await page.getByRole("heading", { name: "Jamie Chen" }).waitFor();
+    } else {
+      await page.getByText("That QR code isn't a Hi Again profile.").waitFor({ timeout: 15000 });
+      const v = await page.evaluate(() => { const el = document.querySelector("video.scanner"); const r = el.getBoundingClientRect();
+        return { w: el.videoWidth, playing: !el.paused && el.readyState >= 2, height: r.height, attached: Boolean(el.srcObject) }; });
+      assert.ok(v.attached && v.playing && v.w > 0 && v.height > 100, `camera feed visible on screen: ${JSON.stringify(v)}`);
+      if (SHOTS) await page.screenshot({ path: `${SHOTS}/scan-camera-390.png` });
+      assert.equal(page.url(), `${BASE}/scan`, "a non-Hi Again code doesn't navigate");
+    }
+    assert.deepEqual(errors, [], "no page errors");
+    results.push(label);
+    await b.close();
+  }
+  return results;
+}
+
 let failed = 0;
+try {
+  const r = await cameraCheck();
+  console.log(`ok   camera scanning (${r.join(", ")})`);
+} catch (e) {
+  failed++;
+  console.log(`FAIL camera scanning: ${e.message}`);
+}
 for (const width of [320, 390]) {
   try {
     await run(width);
