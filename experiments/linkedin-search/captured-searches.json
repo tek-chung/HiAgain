@@ -1,0 +1,25 @@
+{
+  "capturedOn": "2026-11-01",
+  "source": "Public web searches run in Codex; stored result titles and short identifying extracts only. These are snapshots, not fresh searches from this app.",
+  "searches": [
+    {
+      "name": "Tek Kan Chung",
+      "context": "",
+      "query": "site:linkedin.com/in/ \"Tek Kan Chung\"",
+      "results": [
+        { "title": "Tek Kan Chung - FE fundinfo | LinkedIn", "url": "https://uk.linkedin.com/in/tek-kan-chung", "description": "London, England, United Kingdom · FE fundinfo. Public search result; details may be out of date." }
+      ]
+    },
+    {
+      "name": "Alex Smith",
+      "context": "London",
+      "query": "site:linkedin.com/in/ \"Alex Smith\" London",
+      "results": [
+        { "title": "Alex Smith - Obama Foundation | LinkedIn", "url": "https://uk.linkedin.com/in/alex-smith-60a7a133", "description": "London, England, United Kingdom · Obama Foundation." },
+        { "title": "Alex Smith - St. James’s Place | LinkedIn", "url": "https://uk.linkedin.com/in/alex-smith-a34658187", "description": "London, England, United Kingdom · St. James’s Place." },
+        { "title": "Alex Smith - London, England, United Kingdom | Professional Profile | LinkedIn", "url": "https://uk.linkedin.com/in/alex-smith-0a83341a", "description": "London, England, United Kingdom. Public result references Causeway Technologies." },
+        { "title": "Alex Smith - Ozone | Powering the premium web | LinkedIn", "url": "https://uk.linkedin.com/in/alex-smith-a1682642", "description": "London, England, United Kingdom · Ozone." }
+      ]
+    }
+  ]
+}

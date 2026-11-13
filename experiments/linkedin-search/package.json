@@ -1,0 +1,6 @@
+{
+  "name": "hi-again-linkedin-search-test",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.mjs", "test": "node --test test.mjs", "test:browser": "node browser-check.mjs" }
+}

@@ -87,6 +87,7 @@ test("sign-in failures explain the likely fix", () => {
   assert.match(explainSignInError("provider", "The redirect_uri does not match"), /callback URL/);
   assert.match(explainSignInError("exchange", "invalid flow state, no valid flow state found"), /different web address/);
   assert.match(explainSignInError("no_code", null), /Redirect URLs/);
+  assert.match(explainSignInError("exchange", "PKCE code verifier not found in storage. This can happen if the auth flow was initiated in a different browser or device"), /approving in the LinkedIn app/);
   assert.match(explainSignInError(null, null), /didn't complete/);
   assert.equal(clampDetail("x".repeat(500))!.length, 200);
   assert.equal(clampDetail("a\u0000b"), "a b");

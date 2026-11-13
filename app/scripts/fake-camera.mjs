@@ -8,8 +8,10 @@ export async function writeQrVideo(text, path, { width = 640, height = 480, fram
   const qr = PNG.sync.read(await QRCode.toBuffer(text, { margin: 2, width: qrSize, errorCorrectionLevel: "M" }));
   const rgb = new Uint8Array(width * height * 3).fill(235); // light grey "room"
   // "centre", or "corner" to place the code near the top-left edge of the view.
-  const ox = at === "corner" ? 16 : Math.floor((width - qr.width) / 2);
-  const oy = at === "corner" ? 16 : Math.floor((height - qr.height) / 2);
+  // "square-edge": against the top-left corner of the centred square the viewfinder shows.
+  const sq = Math.min(width, height);
+  const ox = at === "corner" ? 16 : at === "square-edge" ? Math.floor((width - sq) / 2) + 12 : Math.floor((width - qr.width) / 2);
+  const oy = at === "corner" ? 16 : at === "square-edge" ? Math.floor((height - sq) / 2) + 12 : Math.floor((height - qr.height) / 2);
   for (let y = 0; y < qr.height; y++) for (let x = 0; x < qr.width; x++) {
     const s = (y * qr.width + x) * 4, d = ((y + oy) * width + (x + ox)) * 3;
     rgb[d] = qr.data[s]; rgb[d + 1] = qr.data[s + 1]; rgb[d + 2] = qr.data[s + 2];

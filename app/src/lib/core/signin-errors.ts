@@ -24,6 +24,9 @@ export function explainSignInError(reason: string | null | undefined, detail: st
   if (/unauthorized_scope|scope/.test(d)) {
     return "LinkedIn refused the requested permissions. Check that “Sign In with LinkedIn using OpenID Connect” is added under Products in the LinkedIn app.";
   }
+  if (/code verifier not found|initiated in a different browser/.test(d)) {
+    return "Sign-in came back in a different browser from the one it started in — this often happens after approving in the LinkedIn app. Tap Continue with LinkedIn below to sign in here; LinkedIn usually remembers your approval, so it's quick. Tip: open Hi Again directly in your phone's main browser rather than from a link inside another app.";
+  }
   if (reason === "exchange" || /code verifier|flow state|flow_state|pkce/.test(d)) {
     return "Sign-in finished on a different web address from the one it started on, so the browser couldn't complete it. Open the site at one address (your main Vercel domain), make sure that address's /auth/callback is in Supabase's Redirect URLs, and try again.";
   }

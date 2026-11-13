@@ -93,7 +93,7 @@ textarea { min-height: 7rem; resize: vertical; }
 
 .saved-context { border-top: 1px solid var(--hs-line); margin-top: 1rem; padding-top: .75rem; }
 details > summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
-video.scanner { display: block; width: 100%; height: auto; max-height: 65dvh; border-radius: var(--radius); background: #000; object-fit: contain; }
+video.scanner { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius); background: #000; object-fit: cover; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Activity badge: top-right of the icon; label stays centred below. */

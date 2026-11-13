@@ -83,19 +83,18 @@ export function Scanner() {
       let frame = 0;
       let lastRead = "";
 
-      // The whole view is scanned. jsQR alternates between the full frame and a full-resolution
-      // look at the middle, which helps with small, distant codes; the native detector sees the full frame.
-      const decodeRegion = (centre: boolean): string | null => {
-        if (!jsQR || !ctx) return null;
+      // Scan exactly what the square viewfinder shows (the centred square of the camera frame),
+      // alternating a detailed pass for small, distant codes with a lighter pass for large, close ones.
+      const decodeVisibleSquare = (detailed: boolean): string | null => {
+        if (!ctx) return null;
         const w = v.videoWidth, h = v.videoHeight;
-        let sx = 0, sy = 0, sw = w, sh = h;
-        if (centre) { const side = Math.round(Math.min(w, h) * 0.75); sx = Math.round((w - side) / 2); sy = Math.round((h - side) / 2); sw = sh = side; }
-        const scale = Math.min(1, (centre ? 800 : 960) / Math.max(sw, sh));
-        canvas.width = Math.round(sw * scale);
-        canvas.height = Math.round(sh * scale);
-        ctx.drawImage(v, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        return jsQR(img.data, img.width, img.height, { inversionAttempts: "attemptBoth" })?.data ?? null;
+        const side = Math.min(w, h);
+        const sx = Math.round((w - side) / 2), sy = Math.round((h - side) / 2);
+        const out = Math.min(side, detailed ? 1080 : 600);
+        canvas.width = canvas.height = out;
+        ctx.drawImage(v, sx, sy, side, side, 0, 0, out, out);
+        const img = ctx.getImageData(0, 0, out, out);
+        return jsQR(img.data, out, out, { inversionAttempts: "attemptBoth" })?.data ?? null;
       };
 
       const tick = async () => {
@@ -105,7 +104,7 @@ export function Scanner() {
           let found: string | null = null;
           try {
             if (detector) found = (await detector.detect(v))[0]?.rawValue ?? null;
-            if (!found) found = decodeRegion(frame % 2 === 1);
+            if (!found) found = decodeVisibleSquare(frame % 2 === 1);
           } catch { /* frame not ready */ }
           if (found) {
             lastRead = found.slice(0, 80);
@@ -134,7 +133,7 @@ export function Scanner() {
         <video ref={video} className="scanner" playsInline muted autoPlay aria-label="Camera view" />
       </div>
       {mode === "starting" && <p className="muted small" role="status">Starting camera…</p>}
-      {mode === "scanning" && <p className="muted small" role="status">{hint ?? "Point your camera at a Hi Again QR code — anywhere in view."}</p>}
+      {mode === "scanning" && <p className="muted small" role="status">{hint ?? "Point your camera at a Hi Again QR code — anywhere in the square."}</p>}
       {debug && <p className="small" style={{ fontFamily: "monospace" }} data-testid="scan-debug">{diag || "starting…"}</p>}
       {mode === "denied" && <p className="banner info small">Camera access is off. Allow it for this site in your browser settings, use your phone&apos;s camera app, or paste a link below.</p>}
       {mode === "busy" && <p className="banner info small">Another app is using the camera. Close it and reload, or paste a link below.</p>}

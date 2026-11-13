@@ -148,8 +148,10 @@ async function cameraCheck() {
     ["Hi Again QR", `${BASE}/p/DevJamieChen`, true, {}],
     // A phone held at arm's length: a small code in a high-definition frame.
     ["small QR in HD frame", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 150 }],
-    // The whole viewfinder counts: a code right at the edge of the view.
-    ["QR at the edge of the view", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 240, at: "corner" }],
+    // The whole square viewfinder counts: a code in its corner, not just the middle.
+    ["QR in the corner of the square viewfinder", `${BASE}/p/DevJamieChen`, true, { width: 1280, height: 720, qrSize: 200, at: "square-edge" }],
+    // Portrait phone camera (taller than wide), code near the square's edge.
+    ["portrait camera, QR near the edge", `${BASE}/p/DevJamieChen`, true, { width: 720, height: 1280, qrSize: 200, at: "square-edge" }],
     // A code made on another address of the app (e.g. a Vercel preview) still opens here.
     ["QR from another Hi Again address", "https://hi-again-git-main-tek.vercel.app/p/DevJamieChen", true, {}],
   ]) {

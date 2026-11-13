@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hi Again · find your LinkedIn</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+  <header><a class="brand" href="/">hi again<span>↗</span></a><span class="test-tag">SEARCH TEST</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">ONE LESS THING TO TYPE</p><h1>Your name.<br>Your LinkedIn.</h1><p>Find your profile, recognise yourself,<br>and make it easier to connect.</p></section>
+    <section class="workspace" aria-label="LinkedIn profile search">
+      <div class="preview"><div class="avatar" aria-hidden="true">TK</div><div><span class="small-label">YOUR TEST PROFILE</span><h2 id="profile-name">Tek Kan Chung</h2><p id="profile-state">LinkedIn not added</p></div></div>
+      <div id="linked" hidden></div>
+      <div id="finder">
+        <form id="search-form"><label for="name">Your name</label><input id="name" name="name" value="Tek Kan Chung" autocomplete="name" required minlength="2" maxlength="100"><div class="context-row"><label for="context">Company or location <span>(optional)</span></label><input id="context" name="context" placeholder="e.g. London" maxlength="100"></div><button class="primary" id="search-button" type="submit">Find my LinkedIn <span aria-hidden="true">↗</span></button></form>
+        <p id="status" role="status" aria-live="polite"></p><p id="error" role="alert" hidden></p>
+        <div id="results-area" hidden><h3>Is this your LinkedIn?</h3><p class="hint">Check the details, then choose your profile.</p><div id="results"></div><button id="none" class="text-button" type="button">None of these — refine my search</button></div>
+        <details id="paste"><summary>Paste a profile link instead</summary><form id="paste-form"><label for="url">LinkedIn profile link</label><input id="url" name="url" placeholder="linkedin.com/in/your-name" maxlength="600" autocomplete="off"><button class="secondary" type="submit">Use this link</button></form></details>
+      </div>
+      <p class="privacy">Only the link you choose is saved in this browser for this test. This does not verify ownership or send a connection request.</p>
+    </section>
+    <aside><div><span class="dot"></span><strong id="mode">Checking search connection…</strong></div><p id="mode-detail"></p><div class="samples">Try a test case <button type="button" data-sample="tek">Your name</button><button type="button" data-sample="alex">A common name</button></div></aside>
+  </main>
+  <footer>Don't just meet. Meet again.</footer>
+  <script type="module" src="/app.mjs"></script>
+</body></html>
