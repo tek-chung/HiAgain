@@ -2,6 +2,15 @@
 
 Moved verbatim from section 11.2 of [the project reference](../HI_AGAIN_REFERENCE.md) in v1.60 (13 November 2026) to keep the reference focused on decisions. Entries are newest first. They record mock-up, hosting and planning work; none is production-application evidence.
 
+## 23 November 2026: delivery pipeline verified
+
+At Tek's request ("do a full test run"), in a cloud session on `tek-chung/HiAgain`:
+
+- **Full suite on `main` (`76cbccc`), PostgreSQL 16.15 and Playwright Chromium:** typecheck; 26/26 unit tests; all nine database suites plus the race tests (8 parallel imports, 20 simultaneous Again pairs, 10 same-name sign-ups); production build; guest journey at 320px and 390px with the camera cases; 74/74 signed-in journeys.
+- **Pipeline:** PR #1 added `20261123230000_pipeline_check.sql` (`select 1;`, no effect). CI passed on the PR; Tek approved the merge; on the merge commit `fcd307d` CI passed, Vercel deployed to production and Supabase's check succeeded. `migration list --remote` (run by Tek) shows all ten migrations recorded.
+- **Also confirmed:** the GitHub Actions workflow runs on GitHub, and Vercel's production deployments from `main` succeed, so the growth loop and reskin are live. An earlier commit (`9f442f4`) failed CI; later commits pass.
+- **Still not verified:** photo upload on the live app.
+
 ## 23 November 2026: production migration history repaired; automatic migrations enabled
 
 Tek moved development to cloud sessions on GitHub (`tek-chung/HiAgain`) with Supabase applying migrations on merge.
@@ -11,7 +20,7 @@ Tek moved development to cloud sessions on GitHub (`tek-chung/HiAgain`) with Sup
 - **CLI config:** `supabase init` added `app/supabase/config.toml` and `app/supabase/.gitignore` (ignores `.temp`).
 - **Automatic migrations:** Supabase GitHub integration on `tek-chung/HiAgain`, working directory `app`, **Deploy to production** on for branch `main`. No preview branches (free plan), so merged migrations go straight to production.
 - **Rules from now on:** schema changes only as migration files in `app/supabase/migrations/`, reviewed in a PR; no schema edits in the SQL Editor (read-only queries such as `funnel_report` are fine); keep migrations backwards-compatible because code and migration deploy together on merge, and split removals or renames into two PRs.
-- **Not verified:** photo upload on the live app after the avatars fix; the first automatic migration on merge (confirm with `supabase migration list --remote` afterwards).
+- **Not verified:** photo upload on the live app after the avatars fix. (The first automatic migration was verified the same evening; see the entry above.)
 
 ## 23 November 2026: connection reskin implemented
 
