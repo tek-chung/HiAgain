@@ -50,6 +50,13 @@ The first section below lists automated evidence. The last two cover what Tek ha
 
 The signed-in run found and fixed a real defect: the browser's built-in URL validation blocked LinkedIn links pasted without `https://`. Those fields now use the app's own validation. The Activity checks caught a second defect: the Activity icon and label sat side by side instead of stacked and centred. The scans check caught a third: a "Guest" or "Scanned you" label stretched onto its own full-width line in People.
 
+## Delivery pipeline (23 November 2026)
+
+- **Full suite re-run on `main` (`76cbccc`) in a cloud session:** typecheck, 26/26 unit tests, all database suites and the three race tests, build, guest journey at 320px and 390px with camera cases, and 74/74 signed-in journeys.
+- **GitHub Actions:** the `checks` workflow passed on PR #1 and on its merge commit `fcd307d`.
+- **Vercel:** production deployments from `main` succeeded, including `76cbccc` (growth loop and reskin) and `fcd307d`.
+- **Automatic migrations:** PR #1 added a no-op migration (`20261123230000_pipeline_check.sql`). After the merge, Supabase applied it to production: `npx supabase@latest migration list --remote` (Tek) shows all ten migrations under Remote.
+
 ## Tried on the live deployment (Tek, Android, 13–14 November 2026)
 
 - **LinkedIn sign-in through Supabase on Vercel:** reached the final step once the settings were corrected. A failure after approving in the LinkedIn app ("came back in a different browser") is now explained on screen, and retrying in the same browser fixes it.
@@ -62,10 +69,7 @@ The signed-in run found and fixed a real defect: the browser's built-in URL vali
 - **Account deletion on the hosted project:** it needs the database role to be able to delete from `auth.users`. Check once with a throwaway account.
 - **LinkedIn name changes:** that Supabase refreshes the LinkedIn name in user metadata at each sign-in, which a profile address following a name change relies on.
 - **Real Google Calendar:** Google's real consent screen, granular-permission behaviour, unverified-app limits and 7-day testing-mode token expiry. Needs a Google Cloud OAuth client.
-- **GitHub Actions workflow:** runs on the next push that touches `app/`. Check the first run.
 - **Photo upload on the live app:** its migration (`20261114090000_avatars.sql`) only reached production on 23 November 2026. Add, change and remove a photo once on the live site.
-- **Automatic migrations:** Supabase applies new migrations when a PR is merged into `main` (set up 23 November 2026). After the first merge that includes a migration, check that `npx supabase@latest migration list --remote` shows it under Remote.
-- **Growth loop and reskin deployment:** merged into `main` on 23 November 2026; confirm that Vercel deployed that build.
 - **Phones in general:** iPhone Safari end to end, in-app browsers, photo upload from phones (HEIC conversion, camera capture), real touch swipes, and QR reading in real lighting.
 - **Accessibility with screen readers:** only structure, labels and tap-target sizes were checked.
 - **Growth loop on the live services:** the digest has only been sent through a test stand-in for Resend (real delivery, spam placement and the Vercel cron schedule are unverified). Also unverified: the service worker and "Add to Home Screen" on real iPhones and Android phones; the different-browser retry with the real LinkedIn app; and event tagging at a real event.
