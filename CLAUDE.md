@@ -15,4 +15,4 @@ For the connection reskin, start with the [reskin brief](docs/CLAUDE_RESKIN_HAND
 - `outputs/` — the standalone HTML mock-up (historical) and an out-of-date handover zip from 13 November (superseded by the repository itself; safe to `git rm`).
 - `sites/` — the published mock-up's own git repository (ignored by the root repository).
 - `experiments/linkedin-search/` — deferred search-and-confirm trial; not in launch scope.
-- `app/` — the production application (deployed). `.github/workflows/ci.yml` runs its checks on every push.
+- `app/` — the production application (deployed). `.github/workflows/ci.yml` runs its checks on every push. Work is done in cloud sessions on `tek-chung/HiAgain` and delivered as PRs. Migrations in `app/supabase/migrations/` are applied to production by Supabase when a PR is merged into `main`; never change the schema in the SQL Editor.

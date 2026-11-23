@@ -20,7 +20,10 @@ Without Supabase settings the app runs in **development-fixture mode**:
 
 ## Going live
 
-1. **Supabase project** (London region). In **SQL Editor** run every file in `supabase/migrations/` in name order, or use the CLI: `supabase link`, then `supabase db push`. Each new migration must run *before* the code that needs it is deployed.
+1. **Supabase project** (London region). Apply the migrations with the CLI from `app/`: `npx supabase@latest link --project-ref <project-ref>`, then `npx supabase@latest db push --remote`. Don't run migration files in the SQL Editor: Supabase wouldn't record them, and the automatic deploys below would try to run them again.
+   - **Automatic migrations:** in Supabase → **Integrations → GitHub**, connect the repository, set **Working directory** to `app` and turn on **Deploy to production** for `main`. Merging a PR to `main` then applies any new migration.
+   - **Schema changes** only as new files in `supabase/migrations/` (`npx supabase@latest migration new <name>`), reviewed in a PR. Code and migration deploy together on merge, so keep migrations backwards-compatible; split a removal or rename into two PRs (stop using it, then remove it).
+   - **Check the history** with `npx supabase@latest migration list --remote`; every local migration should also show under Remote.
 2. **LinkedIn developer app** (linked to a LinkedIn Company Page). Add the product **Sign In with LinkedIn using OpenID Connect**, and on the **Auth** tab add the redirect URL `https://<project-ref>.supabase.co/auth/v1/callback`.
 3. **Supabase → Authentication → Sign In / Providers → LinkedIn (OIDC):** turn it on. The *API Key* field takes the LinkedIn **Client ID**, and the *API Secret Key* takes the **Client Secret**. Leave "Allow users without an email" off.
 4. **Vercel:** import the repository with **Root Directory `app`**, add the environment variables below and deploy. `vercel.json` pins the app server to London, next to the database.

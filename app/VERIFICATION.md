@@ -63,6 +63,9 @@ The signed-in run found and fixed a real defect: the browser's built-in URL vali
 - **LinkedIn name changes:** that Supabase refreshes the LinkedIn name in user metadata at each sign-in, which a profile address following a name change relies on.
 - **Real Google Calendar:** Google's real consent screen, granular-permission behaviour, unverified-app limits and 7-day testing-mode token expiry. Needs a Google Cloud OAuth client.
 - **GitHub Actions workflow:** runs on the next push that touches `app/`. Check the first run.
+- **Photo upload on the live app:** its migration (`20261114090000_avatars.sql`) only reached production on 23 November 2026. Add, change and remove a photo once on the live site.
+- **Automatic migrations:** Supabase applies new migrations when a PR is merged into `main` (set up 23 November 2026). After the first merge that includes a migration, check that `npx supabase@latest migration list --remote` shows it under Remote.
+- **Growth loop and reskin deployment:** merged into `main` on 23 November 2026; confirm that Vercel deployed that build.
 - **Phones in general:** iPhone Safari end to end, in-app browsers, photo upload from phones (HEIC conversion, camera capture), real touch swipes, and QR reading in real lighting.
 - **Accessibility with screen readers:** only structure, labels and tap-target sizes were checked.
 - **Growth loop on the live services:** the digest has only been sent through a test stand-in for Resend (real delivery, spam placement and the Vercel cron schedule are unverified). Also unverified: the service worker and "Add to Home Screen" on real iPhones and Android phones; the different-browser retry with the real LinkedIn app; and event tagging at a real event.
