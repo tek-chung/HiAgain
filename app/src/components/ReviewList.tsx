@@ -78,6 +78,7 @@ export function ReviewList({ people: initial, hasLinkedIn }: { people: RecentPer
       {groups.map((g) => (
         <section key={g.label} aria-label={g.label}>
           <h2 className="group-label">{g.label}</h2>
+          <div className="group-card">
           {g.items.map((p) => (
             <div className="person" key={p.publicId} data-testid="review-row">
               <Avatar name={p.displayName} src={p.avatarUrl} />
@@ -100,6 +101,7 @@ export function ReviewList({ people: initial, hasLinkedIn }: { people: RecentPer
               )}
             </div>
           ))}
+          </div>
         </section>
       ))}
       <p className="small muted" style={{ marginTop: "1rem" }}>Only you can see who you chose. Someone finds out only if they chose you too.</p>

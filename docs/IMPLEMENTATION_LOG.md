@@ -2,6 +2,20 @@
 
 Moved verbatim from section 11.2 of [the project reference](../HI_AGAIN_REFERENCE.md) in v1.60 (13 November 2026) to keep the reference focused on decisions. Entries are newest first. They record mock-up, hosting and planning work; none is production-application evidence.
 
+## 23 November 2026: connection reskin implemented
+
+Built from [the handover](CLAUDE_RESKIN_HANDOVER.md) on top of the growth loop; not yet deployed. This is presentation only: routes, RPCs, storage and access rules are unchanged.
+
+- **Palette:** the theme tokens take the mock-up's colours (off-white `#F7F7EF`, warm white `#FFFEFA`, sage `#EAF2E7`, warm inset `#F3E9DB`, ink `#23352B`) with dark equivalents. A warm-white top bar with a divider.
+- **QR profile** (`ProfileView`): a hero card with a shallow cream-and-sage cover, a 74px overlapping portrait (initials fallback), the name leading, LinkedIn beside it and a compact headline. Invitations are divided rows in one card, with simple icons; an open form continues inside the card. The save states, scanner notice, guest nudge and Again position are unchanged.
+- **People** (`PeopleList`, `ReviewList`): date groups on warm-white cards with photo-led rows and restrained dividers. Archive is still on the left, LinkedIn on the right, and swipes are unchanged.
+- **Saved encounter:** a warm inset holds the "Met at" / "Likely met at" context and the exact save time, immediately before Notes. Guest visitors get the same inset.
+- **Mutual Again** (`AgainBlock`): both portraits together on sage and cream. The viewer's own photo comes from `getViewer()`, which now also reads the viewer's `avatar_url`. Then **You both want to meet again** and selectable rows (coffee, walk, call) with a tick. The editable message, Copy, LinkedIn, "Did you meet up?" and End match are unchanged.
+- **Bottom bar** (`Shell`): three equal touch areas, each icon centred over its label, a sage pill behind the current icon, a stronger green label, and the unread badge anchored at the bell's upper right.
+- **Tests:** two existing checks were updated for the new mutual heading, the step labels and the per-tab icon wrapper. New `scripts/reskin-shots.mjs` (optional: `SHOTS_PREFIX=after CHECKS=reskin-shots npm run check:signed-in`) captures the profile, People, saved detail and mutual screens at 320, 390 and 1,024px in light and dark. It asserts no horizontal overflow, equal navigation widths, centred icons and the active item following the route. It also covers a long name with a long headline and no photo.
+- **Verified:** typecheck; build; 26/26 unit tests; 74/74 signed-in journeys; the guest browser check at 320 and 390px; the reskin shots in both modes at all three widths; tab timing of 44–54 ms. Before-and-after screenshots were inspected.
+- **Not verified:** real phones (touch, safe-area spacing, real photos from LinkedIn), and screen readers beyond structure and labels.
+
 ## 23 November 2026: growth loop
 
 At Tek's request ("fix all these"), after Claude's review of the whole project, Tek accepted the recommendations. Built on branch `improvements/growth-loop`; **not yet deployed**. Run migration `20261123120000_growth_loop.sql` before deploying the code.

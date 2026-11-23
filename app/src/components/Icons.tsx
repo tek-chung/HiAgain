@@ -41,3 +41,21 @@ export function ArchiveIcon() {
     </svg>
   );
 }
+
+// Small line icons for profile invitations and next-step ideas (decorative; labels carry meaning).
+const line = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+export function CoffeeIcon() {
+  return <svg {...line}><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1 .8 1 .8 2M12 3.5c0 1 .8 1 .8 2" /></svg>;
+}
+export function QuestionIcon() {
+  return <svg {...line}><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.1A8 8 0 1 1 20 11.5z" /><path d="M9.8 9.4a2.3 2.3 0 0 1 4.4.9c0 1.5-2.2 1.9-2.2 3M12 16.2v.01" /></svg>;
+}
+export function FeedbackIcon() {
+  return <svg {...line}><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" /></svg>;
+}
+export function WalkIcon() {
+  return <svg {...line}><circle cx="13" cy="4.5" r="1.8" /><path d="M10 21l2-6 3 3v3M9 12l2-4 3 2 3 1M11 8l-3 2-1 3" /></svg>;
+}
+export function PhoneIcon() {
+  return <svg {...line}><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg>;
+}

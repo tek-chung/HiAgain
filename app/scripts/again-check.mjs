@@ -85,9 +85,9 @@ try {
     morganUnread = await badge(m);
     await p.goto(`${BASE}/p/${morgan}`);
     await p.getByRole("button", { name: "Again", exact: true }).click();
-    await p.getByRole("heading", { name: "It's mutual." }).waitFor();
+    await p.getByRole("heading", { name: "You both want to meet again" }).waitFor();
     assert.equal((await matches()).length, 1);
-    await p.getByRole("radio", { name: "Walk" }).click();
+    await p.getByRole("radio", { name: "Go for a walk" }).click();
     assert.equal(await p.getByLabel("Message to send Morgan").inputValue(), "Fancy a walk and a catch-up?");
     await p.getByLabel("Message to send Morgan").fill("Fancy a walk along the canal next week?");
     await p.getByRole("button", { name: "Copy message" }).click();
@@ -105,7 +105,7 @@ try {
     await m.getByRole("link", { name: "Make the next step" }).waitFor();
     await m.waitForFunction((n) => Number(document.querySelector(".nav-badge")?.textContent ?? 0) === n, morganUnread);
     await m.getByRole("link", { name: "Make the next step" }).click();
-    await m.getByRole("heading", { name: "It's mutual." }).waitFor();
+    await m.getByRole("heading", { name: "You both want to meet again" }).waitFor();
   });
 
   await step("either can end the match: it disappears for both, quietly", async () => {

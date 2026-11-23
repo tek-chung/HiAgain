@@ -63,6 +63,7 @@ Never add the Supabase service-role key: the app doesn't use one.
 | `npm run test:db` | Migrations + access-control tests on a throwaway local Postgres, including race tests (simultaneous imports, Again taps, same-name sign-ups). Needs a local Postgres 15+ superuser |
 | `npm run check:browser` | Guest journey and camera scanning (Chromium's fake camera) against a running fixture-mode server (`BASE_URL`, default `http://localhost:3000`) |
 | `npm run check:signed-in` | 74 signed-in journeys end to end: real migrations, a production build, Playwright, and a **test-only Supabase and Google stand-in** (`scripts/supabase-stub.mjs`, never deploy it). Needs local Postgres |
+| `SHOTS_PREFIX=after CHECKS=reskin-shots npm run check:signed-in` | Screenshots of the reskinned surfaces into `/tmp/shots/` at three widths in light and dark, with layout assertions |
 | `npm run check:perf` | Times bottom-tab navigation with 80 ms of simulated app–database distance |
 
 Playwright needs a browser once: `npx playwright install chromium`. `.github/workflows/ci.yml` runs all of these on every push that touches `app/`.

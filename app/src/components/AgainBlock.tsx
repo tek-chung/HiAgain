@@ -6,14 +6,16 @@ import { startLinkedInSignIn } from "@/lib/auth-client";
 import { GUEST_SCOPE } from "@/lib/core/guest";
 import { deleteDraft, listDrafts, putDraft } from "@/lib/guest-store";
 import { logFunnel } from "@/lib/funnel";
+import { Avatar } from "./Avatar";
+import { CheckIcon, CoffeeIcon, PhoneIcon, WalkIcon } from "./Icons";
 
 export type AgainState = "none" | "sent" | "matched";
 export const AGAIN_INTENT = "again"; // draft key used to carry the intent through sign-in
 
 const NEXT_STEPS = {
-  coffee: { label: "Coffee", text: "Coffee and a catch-up?" },
-  walk: { label: "Walk", text: "Fancy a walk and a catch-up?" },
-  call: { label: "Call", text: "Would you be up for a quick call?" },
+  coffee: { label: "Coffee and a catch-up", text: "Coffee and a catch-up?", Icon: CoffeeIcon },
+  walk: { label: "Go for a walk", text: "Fancy a walk and a catch-up?", Icon: WalkIcon },
+  call: { label: "Have a quick call", text: "Would you be up for a quick call?", Icon: PhoneIcon },
 } as const;
 type Step = keyof typeof NEXT_STEPS;
 
@@ -25,6 +27,10 @@ interface Props {
   initial: AgainState;
   resume: boolean;
   signInAvailable: boolean;
+  /** Portraits for the mutual state only: theirs (public) and the viewer's own. */
+  avatarUrl?: string | null;
+  viewerName?: string | null;
+  viewerAvatarUrl?: string | null;
   /** When the match was made, and this person's own answer to "Did you meet up?". */
   matchedAt?: string | null;
   outcome?: Outcome | null;
@@ -44,7 +50,7 @@ export const OUTCOME_ASK_AFTER_DAYS = 3;
  * Again: private interest in meeting again. One-sided interest is visible only to the sender;
  * both people see the match only when it's mutual. Either person can end a match.
  */
-export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, resume, signInAvailable, matchedAt = null, outcome: initialOutcome = null }: Props) {
+export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, resume, signInAvailable, avatarUrl = null, viewerName = null, viewerAvatarUrl = null, matchedAt = null, outcome: initialOutcome = null }: Props) {
   const router = useRouter();
   const [state, setState] = useState<AgainState>(initial);
   const [busy, setBusy] = useState(false);
@@ -102,15 +108,24 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
   if (state === "matched") {
     return (
       <section className="card again matched" aria-labelledby="again-h">
-        <h2 id="again-h" style={{ marginBottom: 0 }}>It&apos;s mutual.</h2>
-        <p className="small muted">You both want to meet again. Make the next step.</p>
-        <div className="tabs" role="radiogroup" aria-label="Next step">
-          {(Object.keys(NEXT_STEPS) as Step[]).map((k) => (
-            <button key={k} role="radio" aria-checked={step === k} aria-selected={step === k}
-              onClick={() => { setStep(k); setMessage(NEXT_STEPS[k].text); setCopied(null); }}>
-              {NEXT_STEPS[k].label}
-            </button>
-          ))}
+        <div className="pair" aria-hidden="true">
+          <Avatar name={viewerName || "You"} src={viewerAvatarUrl} size="lg" />
+          <Avatar name={name} src={avatarUrl} size="lg" />
+        </div>
+        <h2 id="again-h" className="match-title">You both want to meet again</h2>
+        <p className="small muted" style={{ textAlign: "center" }}>You and {name}. Choose a next step, then send it your way.</p>
+        <div className="ideas" role="radiogroup" aria-label="Next step">
+          {(Object.keys(NEXT_STEPS) as Step[]).map((k) => {
+            const { Icon, label } = NEXT_STEPS[k];
+            return (
+              <button key={k} role="radio" aria-checked={step === k} className="idea"
+                onClick={() => { setStep(k); setMessage(NEXT_STEPS[k].text); setCopied(null); }}>
+                <span className="action-icon" aria-hidden="true"><Icon /></span>
+                <span className="idea-label">{label}</span>
+                <span className="idea-tick" aria-hidden="true"><CheckIcon /></span>
+              </button>
+            );
+          })}
         </div>
         <label className="field">
           <span className="sr-only">Message to send {first}</span>

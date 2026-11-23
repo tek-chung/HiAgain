@@ -41,6 +41,7 @@ export interface Viewer {
   userId: string;
   displayName: string;
   publicId: string | null;
+  avatarUrl: string | null;
 }
 
 /** The signed-in account plus its public ID and name (one small query). Cached per request. */
@@ -48,6 +49,6 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   const userId = await getViewerId();
   if (!userId) return null;
   const supabase = (await createClient())!;
-  const { data: profile } = await supabase.from("profiles").select("public_id, display_name").maybeSingle();
-  return { userId, displayName: profile?.display_name || "your account", publicId: profile?.public_id ?? null };
+  const { data: profile } = await supabase.from("profiles").select("public_id, display_name, avatar_url").maybeSingle();
+  return { userId, displayName: profile?.display_name || "your account", publicId: profile?.public_id ?? null, avatarUrl: profile?.avatar_url ?? null };
 });

@@ -50,7 +50,7 @@ export async function ProfilePage({ publicId }: { publicId: string }) {
   return (
     <ProfileView
       profile={profile}
-      viewer={viewer ? { userId: viewer.userId } : null}
+      viewer={viewer ? { userId: viewer.userId, displayName: viewer.displayName, avatarUrl: viewer.avatarUrl } : null}
       isSelf={isSelf}
       initialSave={initialSave}
       contributions={contributions}

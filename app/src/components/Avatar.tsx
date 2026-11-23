@@ -1,7 +1,7 @@
-export function Avatar({ name, src }: { name: string; src: string | null }) {
+export function Avatar({ name, src, size }: { name: string; src: string | null; size?: "lg" }) {
   const initials = name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
   return (
-    <div className="avatar" aria-hidden="true">
+    <div className={"avatar" + (size ? ` ${size}` : "")} aria-hidden="true">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {src ? <img src={src} alt="" referrerPolicy="no-referrer" /> : initials}
     </div>

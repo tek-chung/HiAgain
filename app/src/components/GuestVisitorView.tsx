@@ -40,7 +40,7 @@ export function GuestVisitorView({ id, alias, firstAt, note, noteUpdatedAt, arch
       {archived && <p className="banner info small" role="status">In your Archive.</p>}
       <p className="small muted">They scanned your code without signing in, so there&apos;s no profile, LinkedIn link or Again to show.</p>
       <section className="saved-context" aria-label="Saved context">
-        <p className="small muted">Scanned your code {exactTimestamp(firstAt)}</p>
+        <div className="encounter"><p className="small muted encounter-time">Scanned your code {exactTimestamp(firstAt)}</p></div>
         <NoteEditor note={note} noteUpdatedAt={noteUpdatedAt} privacyLine="Only you can see these notes." onSave={saveNote} />
       </section>
       <button className="btn small" style={{ marginTop: "1rem" }} onClick={toggleArchive}>{archived ? "Restore" : "Archive"}</button>

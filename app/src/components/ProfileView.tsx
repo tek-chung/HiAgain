@@ -13,7 +13,7 @@ import { getBrowserClient } from "@/lib/supabase/client";
 import { startLinkedInSignIn } from "@/lib/auth-client";
 import { Avatar, LinkedInLink } from "./Avatar";
 import { NoteEditor, type NoteSaveResult } from "./NoteEditor";
-import { CheckIcon } from "./Icons";
+import { CheckIcon, CoffeeIcon, FeedbackIcon, QuestionIcon } from "./Icons";
 import { SavedContext, type EncounterContext } from "./SavedContext";
 import { AgainBlock, AGAIN_INTENT, type AgainState, type Outcome } from "./AgainBlock";
 import { guestHashFor } from "@/lib/guest-token";
@@ -25,7 +25,7 @@ export interface ServerSave { savedAt: string; note: string; noteUpdatedAt: stri
 
 interface Props {
   profile: PublicProfile;
-  viewer: { userId: string } | null;
+  viewer: { userId: string; displayName?: string; avatarUrl?: string | null } | null;
   isSelf: boolean;
   initialSave: ServerSave | null;
   contributions: Contribution[];
@@ -186,14 +186,15 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
   return (
     <article>
       {isSelf && <p className="banner info small">This is your profile — this is what people see when they scan your code.</p>}
-      <header className="row" style={{ marginBottom: ".5rem" }}>
-        <Avatar name={name} src={profile.avatarUrl} />
-        <div style={{ minWidth: 0 }}>
+      <header className="hero">
+        <div className="hero-cover" aria-hidden="true" />
+        <div className="hero-body">
+          <Avatar name={name} src={profile.avatarUrl} size="lg" />
           <div className="name-line">
-            <h1 style={{ margin: 0 }}>{name}</h1>
+            <h1>{name}</h1>
             <LinkedInLink url={profile.linkedinUrl} name={name} />
           </div>
-          {profile.headline && <p className="muted" style={{ margin: 0 }}>{profile.headline}</p>}
+          {profile.headline && <p className="hero-headline">{profile.headline}</p>}
         </div>
       </header>
 
@@ -223,13 +224,16 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
           initial={again}
           resume={resumeId === AGAIN_INTENT}
           signInAvailable={signInAvailable}
+          avatarUrl={profile.avatarUrl}
+          viewerName={viewer?.displayName ?? null}
+          viewerAvatarUrl={viewer?.avatarUrl ?? null}
           matchedAt={matchedAt}
           outcome={outcome}
         />
       )}
 
       {profile.actions.length === 0 && <p className="muted small">{name} hasn&apos;t added any invitations yet.</p>}
-      {profile.actions.map((a) => (
+      {profile.actions.length > 0 && <div className="actions-list">{profile.actions.map((a) => (
         <ActionCard
           key={a.id}
           action={a}
@@ -244,16 +248,18 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
           initialDraft={resumeDraft?.actionId === a.id ? resumeDraft : null}
           onSent={(c) => { setSent((m) => ({ ...m, [a.id]: c })); router.refresh(); }}
         />
-      ))}
+      ))}</div>}
 
       {!isSelf && save.kind === "saved" && (
         <section className="saved-context" aria-label="Saved context">
-          <p className="small muted">
-            {initialSave?.source === "incoming_scan" ? "Scanned your code" : "Saved"} {exactTimestamp(save.savedAt)}{save.where === "browser" ? " · this browser" : ""}
-          </p>
-          {save.where === "account" && (
-            <SavedContext publicId={profile.publicId} initial={initialSave?.context ?? null} dismissed={initialSave?.contextDismissed ?? false} />
-          )}
+          <div className="encounter">
+            {save.where === "account" && (
+              <SavedContext publicId={profile.publicId} initial={initialSave?.context ?? null} dismissed={initialSave?.contextDismissed ?? false} />
+            )}
+            <p className="small muted encounter-time">
+              {initialSave?.source === "incoming_scan" ? "Scanned your code" : "Saved"} {exactTimestamp(save.savedAt)}{save.where === "browser" ? " · this browser" : ""}
+            </p>
+          </div>
           <NoteEditor
             note={save.note}
             noteUpdatedAt={save.noteUpdatedAt}
@@ -385,6 +391,9 @@ function ActionCard({ action, ownerPublicId, scope, disabled, signedIn, signInAv
   return (
     <div>
       <button className="action" onClick={onToggle} aria-expanded={open} disabled={disabled && !sent}>
+        <span className="action-icon" aria-hidden="true">
+          {action.kind === "join_me" ? <CoffeeIcon /> : action.kind === "question" ? <QuestionIcon /> : <FeedbackIcon />}
+        </span>
         <div style={{ minWidth: 0 }}>
           <div className="t">
             {label.title}
@@ -395,7 +404,7 @@ function ActionCard({ action, ownerPublicId, scope, disabled, signedIn, signInAv
         <span className="chev" aria-hidden="true">›</span>
       </button>
       {open && !disabled && (
-        <div className="card" style={{ marginTop: "-.25rem" }}>
+        <div className="card composer">
           {sent ? (
             <SentContribution c={sent} kind={action.kind} notice={notice} onUpdated={onSent} />          ) : (
             <form onSubmit={(e) => { e.preventDefault(); if (signedIn) void send(body, key); else void signInAndSend(); }}>

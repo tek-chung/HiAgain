@@ -55,7 +55,7 @@ try {
     unreadStart = await badge();
     const expected = (await q("select count(*)::int n from public.contributions where recipient_id = $1", [ALEX]))[0].n;
     assert.equal(unreadStart, expected, "badge counts all received, none read yet");
-    const icon = await page.locator(".nav-icon").boundingBox(), b = await page.locator(".nav-badge").boundingBox();
+    const icon = await page.getByRole("link", { name: /Activity/ }).locator(".nav-icon svg").boundingBox(), b = await page.locator(".nav-badge").boundingBox();
     const label = await page.getByRole("link", { name: /Activity/ }).boundingBox();
     assert.ok(b.x > icon.x + icon.width / 2 && b.y < icon.y + icon.height / 2, "badge at the icon's upper right");
     assert.ok(Math.abs(icon.x + icon.width / 2 - (label.x + label.width / 2)) < 3, "icon and label centred");

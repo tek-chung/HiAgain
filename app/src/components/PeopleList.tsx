@@ -97,6 +97,7 @@ export function PeopleList({ accountSaves, guestVisitors = [], notice }: { accou
       {groupByDay(people, (p) => p.savedAt).map((g) => (
         <section key={g.label} aria-label={g.label}>
           <h2 className="group-label">{g.label}</h2>
+          <div className="group-card">
           {g.items.map((p) => (
             <PersonRow
               key={p.publicId}
@@ -112,6 +113,7 @@ export function PeopleList({ accountSaves, guestVisitors = [], notice }: { accou
               onNoLinkedIn={() => setBanner({ text: p.guestId ? "Guests don't have a LinkedIn link." : `${p.displayName || "This person"} hasn't added a LinkedIn link.` })}
             />
           ))}
+          </div>
         </section>
       ))}
     </div>
