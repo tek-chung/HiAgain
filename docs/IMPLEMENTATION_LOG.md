@@ -19,6 +19,16 @@ At Tek's request ("fix all these"), after Claude's review of the whole project, 
 - **Verified** (cloud sandbox, fictional data): typecheck; build; 26/26 unit tests; all database suites, including the new growth suite, which was shown to fail on a wrong expectation; 74/74 signed-in journeys (10 new, plus the updated sign-in retry check); the guest browser check at 320 and 390 px; tab timing of 47–81 ms. Screenshots of the review, organiser, LinkedIn prompt, guest nudge and offline screens were inspected.
 - **Not verified:** real Resend delivery and the Vercel cron; iPhone and Android service worker and installation; the retry with the real LinkedIn app; a real event.
 
+## 23 November 2026 — Claude connection reskin handover
+
+- Packaged the [handover ZIP](../outputs/design/hi-again-claude-reskin.zip) with the implementation brief, offline preview, three screenshots and two original vector logos. Added the [brief](CLAUDE_RESKIN_HANDOVER.md) to the repository's Claude entry point.
+- Brought the existing People, Activity and My QR icons into the mock-up, with a soft selected treatment and a stable unread badge. Chromium passed seven checks at 320px, 390px and 1,024px in light and dark mode, covering navigation order, embedded icons, active state, bell alignment, fit and preview interactions. Inspected the dark People capture and verified all seven ZIP entries.
+
+## 23 November 2026 — Connection design mock-ups
+
+- Created [three mobile mock-ups](../outputs/design/connection-mockups.html) for the public QR profile, saved encounters and mutual Again. Used the adopted wordmark and green, sample portraits and fictional encounter details. All interactions run locally in the mock-up.
+- Chromium passed 14 checks at each of 320px, 390px and 1,024px, covering image loading, horizontal fit, Again and undo, saved encounter detail, return focus, action previews and next-step selection. Inspected the three-column render.
+
 ## 14 November 2026: logos
 
 - Traced Tek’s two logos to vector (`brand/*.svg`) and added `app/src/components/Logo.tsx` (`LogoMark`, `LogoWordmark`, using `currentColor`).

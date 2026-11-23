@@ -1,7 +1,7 @@
 # Hi Again project reference
 
 **Last updated:** 23 November 2026  
-**Version:** 1.71  
+**Version:** 1.73  
 **Stage:** Pilot app built and deployed; live verification in progress  
 **Owner:** Tek  
 **Purpose:** The living reference for Hi Again's product, decisions, reasoning, scope and unresolved questions. Read this before continuing project work and update it as decisions develop.
@@ -398,6 +398,10 @@ V reports a positive response to minimalist wireframes and adds a more concrete 
 
 **Logos adopted, 14 November 2026 (confirmed by Tek):** Tek supplied two logos and asked for them to be used: a waving-hand mark with a smile, and the same hand beside a rounded “Hi Again” wordmark, both black on white. The originals and vector traces are in `brand/`. The app uses the wordmark in the header, the hand on the welcome and sign-in pages, and the hand for the browser tab icon, home-screen icons (white background) and link previews. Implementation choices (suggested, easy to change): near-black `#1d1d1b`, switching to near-white in dark mode; the app’s green palette is unchanged. Colour variants, minimum sizes and spacing rules remain open.
 
+**Connection design exploration, 23 November 2026:** Tek suggested exploring LinkedIn-style familiarity alongside the feeling of connection. Three mock-ups explore a clear professional QR profile, a private saved encounter and paired portraits on mutual Again. The mock-ups retain the adopted wordmark and green accent. The three treatments remain proposals.
+
+**Reskin handover, 23 November 2026:** Tek asked to hand the connection treatment to Claude and explicitly requested retaining the existing bottom navigation icons. Use the People, Activity and My QR icons, labels and order from the current app. The handover illustrates a soft background behind the selected icon and the unread badge anchored to the bell.
+
 The requested standalone hand and a simpler alternative without a face are saved as `outputs/brand/hi-again-hand-only-v1.png` and `outputs/brand/hi-again-hand-alternative-v1.png`. Both remain exploratory; no final selection made.
 
 ### 9.2 Agreed language
@@ -563,6 +567,7 @@ The product thesis, brand lines, action-led participation, private mutual Again,
   - **Live so far (Tek, Android):** LinkedIn sign-in reached completion; in-app camera shows its feed; phone camera apps decode the profile link.
   - **Growth loop (23 November 2026, branch `improvements/growth-loop`, not yet deployed):** LinkedIn link prompt, guest nudge, Again review, Event mode, next-day digest email with opt-out, “Did you meet up?”, offline QR and home-screen shortcuts, sign-in auto-retry, funnel counts. Migration `20261123120000_growth_loop.sql`. Evidence in the [implementation log](docs/IMPLEMENTATION_LOG.md).
 - **Interactive mock-up:** fictional, simulated services. Standalone [HTML](outputs/hi-again-mockup.html), identical to `sites/hi-again-mockup/dist/index.html`, publicly viewable at https://hi-again-journey-demo.woollysnipe13.chatgpt.site. It shows LinkedIn sign-in followed by an optional Google Calendar connection.
+- **Connection reskin:** [Three mobile mock-ups](outputs/design/connection-mockups.html) and a [Claude handover](docs/CLAUDE_RESKIN_HANDOVER.md), with the agreed bottom navigation icons. The pilot app awaits implementation. Dated browser checks are in the implementation log.
 - **Deferred experiment:** LinkedIn search-and-confirm in `experiments/linkedin-search/` (back pocket, not in scope).
 - **Detailed history:** every dated mock-up revision, hosting change and local verification result is kept in the [implementation log](docs/IMPLEMENTATION_LOG.md). Add new implementation entries there and keep this summary current.
 
@@ -787,9 +792,11 @@ This reference records project decisions. Action recommendations in the source m
 | 14 November 2026 | 1.68 | Recorded Tek's decisions: hiagain.link is secured and will be used; name-based profile addresses from the LinkedIn name, numbered for duplicates, following name changes with redirects. Recorded the build. |
 | 14 November 2026 | 1.69 | Tidy-up: stage updated to “pilot app built and deployed”; domain rows merged (hiagain.link secured); section 11 summarised with links to the app README and verification record; open questions 13 and 14 brought up to date. No product decision changed. |
 | 14 November 2026 | 1.70 | Tek supplied the logos to use (hand mark and hand-plus-“Hi Again” wordmark); recorded them as the adopted identity and applied them across the app, icons and link previews. |
+| 23 November 2026 | 1.71 | Recorded and prototyped three exploratory ways to make connection tangible: a warm professional profile, a private encounter detail and paired portraits for mutual Again. |
+| 23 November 2026 | 1.72 | Packaged the connection reskin for Claude and recorded Tek's direction to retain the existing bottom navigation icons. Added those icons to the mock-ups. |
 
 | 13 November 2026 | 1.68 | Created the requested minimalist, friendly hand-logo concept; recorded it as exploratory rather than a final identity. |
 
 
 | 13 November 2026 | 1.69 | Added the requested standalone hand and an alternative without a face; both remain exploratory. |
-| 23 November 2026 | 1.71 | Tek accepted Claude's growth recommendations in full. Recorded the next-day digest email (superseding no email for the pilot), Event mode, Again review, LinkedIn link prompt, guest nudge, “Did you meet up?”, offline QR, sign-in retry and funnel counts, with organiser-privacy and threshold defaults marked as built choices. Implemented on a branch with tests; not deployed. |
+| 23 November 2026 | 1.73 | Tek accepted Claude's growth recommendations in full. Recorded the next-day digest email (superseding no email for the pilot), Event mode, Again review, LinkedIn link prompt, guest nudge, “Did you meet up?”, offline QR, sign-in retry and funnel counts, with organiser-privacy and threshold defaults marked as built choices. Implemented on a branch with tests; not deployed. |

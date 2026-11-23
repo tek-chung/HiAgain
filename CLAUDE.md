@@ -6,6 +6,8 @@ The app is built and deployed. Start with [app/README.md](app/README.md) (setup,
 
 The [HTML mock-up](outputs/hi-again-mockup.html) is historical; the live app is the reference for behaviour.
 
+For the connection reskin, start with the [reskin brief](docs/CLAUDE_RESKIN_HANDOVER.md) or the [portable handover](outputs/design/hi-again-claude-reskin.zip).
+
 ## Workspace map
 
 - `HI_AGAIN_REFERENCE.md` — current decisions, history and open questions (the source of truth).
