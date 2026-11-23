@@ -25,3 +25,4 @@ sites/
 
 # Files the Claude desktop app saves from chat downloads
 Claude outputs/
+.codex-attachments/
