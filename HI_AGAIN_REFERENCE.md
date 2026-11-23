@@ -1,7 +1,7 @@
 # Hi Again project reference
 
-**Last updated:** 13 November 2026  
-**Version:** 1.70  
+**Last updated:** 23 November 2026  
+**Version:** 1.71  
 **Stage:** Pilot app built and deployed; live verification in progress  
 **Owner:** Tek  
 **Purpose:** The living reference for Hi Again's product, decisions, reasoning, scope and unresolved questions. Read this before continuing project work and update it as decisions develop.
@@ -54,7 +54,10 @@ Tek confirmed these lines and automatic guest saving on 30 October 2026. On 13 N
 | Notes length | Private saver notes up to 2,000 characters (contributions 1,500; invitations 180). | Confirmed by Tek, 13 November 2026. |
 | Calendar disconnect | Deletes guessed “Likely met at” context; keeps context the person picked or typed. | Confirmed by Tek, 13 November 2026. |
 | Retention | Anonymous guest visits are kept for 12 months after the most recent visit; saves, notes and contributions stay until the person deletes their account. | Confirmed by Tek, 13 November 2026. No per-item deletion of sent contributions exists yet. |
-| Email notifications | None for the pilot; Activity (in-app badge) is the only notification. | Confirmed by Tek, 13 November 2026. |
+| Email notifications | **One next-day digest email** the morning after someone meets people (counts and event name only, never names or one-sided Again), at most once a day, on by default with an opt-out under My QR → Privacy and account. Activity stays the in-app notification. | Tek accepted, 23 November 2026, superseding “no email for the pilot” (13 November). Built; sending is dormant until a Resend key and sender address are configured. |
+| Growth loop | Accepted together by Tek, 23 November 2026: an **Add your LinkedIn link** prompt under the QR until a link is saved; a **guest nudge** (“Name can't see who you are … sign in so Name has you too”); an **Again review** screen (`/review`) of people met in the last week; **Event mode** (`/events`, `/e/<code>`); a **“Did you meet up?”** question three days after a mutual match; an **offline QR** and home-screen shortcuts; an automatic **sign-in retry** after a different-browser return; and privacy-light **funnel counts**. | Accepted from Claude's recommendations (23 November 2026). Built and tested with fictional data on branch `improvements/growth-loop`; not yet deployed. |
+| Event mode | An organiser creates an event (name, date, times; up to 3 days) and shows its QR at the door. Signed-in people who open it join automatically; guests are asked to sign in. Saves between two attendees while the event is on (2 hours either side) are tagged “Met at <event>” both ways, without replacing context the person set or removed. **Organisers see totals only** (joined, connections, mutual Agains), never who joined; mutual Agains are hidden until 5 people have joined. Attendance is private to each attendee. | Built defaults, 23 November 2026; the 5-person threshold, time window and organiser totals are adjustable choices, not separately confirmed by Tek. |
+| Pilot measurement | `funnel_report()` (Supabase SQL Editor only) counts the funnel from existing tables, plus a few in-browser steps stored as **daily totals with no user or device identifiers**. “Did you meet up?” answers (We met / It's planned / Not yet / No) are private to each person and counted in aggregate. | Built default, 23 November 2026. Partly answers open question 15. |
 | Profile address | `hiagain.link/<name>` (e.g. `hiagain.link/tek-chung`), always from the person's LinkedIn name — not chosen by hand. Same names are numbered (`tek-chung-2`). A LinkedIn name change moves the address at the next sign-in; earlier addresses keep redirecting. Older `/p/<id>` links keep working. | Confirmed by Tek, 14 November 2026. |
 | Interaction model | One-off event interest, answers and requests; view contributions in Hi Again and continue externally. | Recorded concept; detailed fulfilment and release boundary open; V |
 | Sender contribution access | Senders read/edit written content in place, both on the original submission view and through Activity → Sent. Sending changes the form to the saved contribution with inline Edit; the CTA becomes Save changes while editing. No separate confirmation, edit or save screen. Recipients see saved updates but cannot edit another person's text. | Confirmed read/edit, single-screen and no-confirmation-screen refinements; Tek, 31 October 2026. |
@@ -558,7 +561,7 @@ The product thesis, brand lines, action-led participation, private mutual Again,
 - **Production application:** built and deployed (`app/`, Next.js 16 on Vercel, Supabase in London). Setup, features and confirmed rules: [`app/README.md`](app/README.md); test evidence and what is still unverified: [`app/VERIFICATION.md`](app/VERIFICATION.md).
   - **Built:** LinkedIn sign-in with immediate QR; name-based profile addresses; guest saves, notes and drafts with retry-safe import; the three actions with sender editing; Activity with unread state; People with Archive and swipes; Again; incoming scans with scanner notice; optional Google Calendar context and Join me ideas; photo upload; blocking, reporting and account deletion; 12-month guest-visit retention.
   - **Live so far (Tek, Android):** LinkedIn sign-in reached completion; in-app camera shows its feed; phone camera apps decode the profile link.
-  - **Not built, by decision:** email notifications (none for the pilot).
+  - **Growth loop (23 November 2026, branch `improvements/growth-loop`, not yet deployed):** LinkedIn link prompt, guest nudge, Again review, Event mode, next-day digest email with opt-out, “Did you meet up?”, offline QR and home-screen shortcuts, sign-in auto-retry, funnel counts. Migration `20261123120000_growth_loop.sql`. Evidence in the [implementation log](docs/IMPLEMENTATION_LOG.md).
 - **Interactive mock-up:** fictional, simulated services. Standalone [HTML](outputs/hi-again-mockup.html), identical to `sites/hi-again-mockup/dist/index.html`, publicly viewable at https://hi-again-journey-demo.woollysnipe13.chatgpt.site. It shows LinkedIn sign-in followed by an optional Google Calendar connection.
 - **Deferred experiment:** LinkedIn search-and-confirm in `experiments/linkedin-search/` (back pocket, not in scope).
 - **Detailed history:** every dated mock-up revision, hosting change and local verification result is kept in the [implementation log](docs/IMPLEMENTATION_LOG.md). Add new implementation entries there and keep this summary current.
@@ -632,6 +635,7 @@ Dates below distinguish the original chat history from this consolidation. Where
 | Question prompt | The selected default asked the visitor what they were enjoying working on, overlapping with the feedback request about their project or challenge. | Tek preferred a question about the profile owner, then asked for a more concise version, 1 November 2026. | “What would you like to know about my work?” Confirmed default; distinct from the visitor-focused feedback request. |
 | Again lifecycle | Withdrawal before a match was a proposed default; post-match removal and expiry were open. | Tek chose the recommended options when asked before Again was built, 13 November 2026. | Withdraw any time before a match; either person can end a match, removing it for both without notification; one-sided Again never expires. |
 | Incoming scans, blocking, deletion and match disclosure | Incoming scans were confirmed without a notice rule; blocking, deletion effects and match disclosure were open. | Tek chose the recommended options when asked before building, 13 November 2026. | Short scanner notice; silent full-separation blocking; permanent deletion including sent contributions; matches reveal only existing public links. |
+| Notifications and growth loop | No email for the pilot; no events, review screen or measurement. | Claude's review found matches going unseen without a nudge, new profiles with no LinkedIn link, guests invisible to owners and calendar context unavailable to most users before Google verification. Tek accepted all the recommendations, 23 November 2026. | Next-day digest email (opt-out), LinkedIn link prompt, guest nudge, Again review, Event mode, “Did you meet up?”, offline QR, sign-in retry, funnel counts. |
 | Public fields, note length, calendar disconnect and retention | Implemented as provisional defaults pending confirmation; guest visits had no retention limit. | Tek confirmed the recommended options, 13 November 2026. | Allowlist as built; 2,000-character notes; delete guessed calendar context only; guest visits 12 months, everything else until account deletion. |
 
 **Recovered detail, not a preference change:** Version 1.1 replaces version 1.0's incomplete Share interpretations and open-ended Again description with V's recorded event/question/help mechanisms and mutual-interest rule. The source is dated 29 October and was supplied later; the update reflects better evidence, not a claim that Tek reversed those decisions on 30 October.
@@ -643,7 +647,7 @@ The order below is a suggested sequence based on dependencies in the concept, no
 | Priority | Decision needed | Why it matters |
 | --- | --- | --- |
 | 1 | After mutual Again, how do contact disclosure and coordination work? | Coffee/walk/call suggestions and the withdrawal/ending/no-expiry lifecycle are confirmed (13 November 2026); exact logistics and contact disclosure remain open. |
-| 2 | How are contributions viewed and notified: activity entry, email, or both? | Defines the owner experience without adding an inbox-style conversation. |
+| 2 | How are contributions viewed and notified: activity entry, email, or both? (The next-day digest now covers meetings and new matches, not contributions.) | Defines the owner experience without adding an inbox-style conversation. |
 | 3 | Does **Join me** record interest only or also facilitate registration/attendance? | Prevents an interest signal being mistaken for a booking or attendance commitment. |
 | 4 | Can an owner acknowledge or decline an **Ask for feedback** (help) request, and how? | Defines closure without expanding into native messaging. |
 | 5 | One active event/question/offer per action, or multiple? | Fixes content configuration and profile complexity. |
@@ -656,7 +660,7 @@ The order below is a suggested sequence based on dependencies in the concept, no
 | 12 | How are LinkedIn URLs entered, validated and updated? | The launch integration does not supply automatic URL discovery. |
 | 13 | Do the live services and phones behave as tested? | The app is deployed and LinkedIn sign-in has worked live on Android; Google Calendar, iPhone end to end, account deletion on the hosted database and phone QR reading still need confirming (see `app/VERIFICATION.md`). |
 | 14 | What is the brand-clearance position? | `hiagain.link` is secured (14 November 2026); trademark and existing-brand clearance remain open before material brand commitments. |
-| 15 | What counts as a meaningful second interaction and how will the pilot observe it? | Measures the product outcome beyond contacts, button presses or mutual matches. |
+| 15 | What counts as a meaningful second interaction and how will the pilot observe it? (Now observable: “Did you meet up?” answers and `funnel_report()`. A target is still to be agreed.) | Measures the product outcome beyond contacts, button presses or mutual matches. |
 
 The first eight questions derive from outstanding decisions in V, with sign-in timing explicit from its act-first journey. Preserve the settled private mutual-interest rule, participation mechanisms and removal of general connection requests. The old three-Share product framing has since been retired; use the current action-led direction throughout the UI.
 
@@ -788,4 +792,4 @@ This reference records project decisions. Action recommendations in the source m
 
 
 | 13 November 2026 | 1.69 | Added the requested standalone hand and an alternative without a face; both remain exploratory. |
-
+| 23 November 2026 | 1.71 | Tek accepted Claude's growth recommendations in full. Recorded the next-day digest email (superseding no email for the pilot), Event mode, Again review, LinkedIn link prompt, guest nudge, “Did you meet up?”, offline QR, sign-in retry and funnel counts, with organiser-privacy and threshold defaults marked as built choices. Implemented on a branch with tests; not deployed. |

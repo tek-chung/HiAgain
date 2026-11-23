@@ -31,12 +31,16 @@ export GOOGLE_CLIENT_ID=test-client GOOGLE_CLIENT_SECRET=test-secret
 export CALENDAR_TOKEN_KEY="$(node -e 'console.log(require("crypto").randomBytes(32).toString("base64"))')"
 export GOOGLE_AUTH_URL="http://localhost:$STUB_PORT/google/auth" GOOGLE_TOKEN_URL="http://localhost:$STUB_PORT/google/token"
 export GOOGLE_REVOKE_URL="http://localhost:$STUB_PORT/google/revoke" GOOGLE_CALENDAR_API="http://localhost:$STUB_PORT/google/calendar"
+# Digest email: a test-only secret and the stub's Resend stand-in.
+export CRON_SECRET="e2e-cron-secret-0123456789abcdef0123" RESEND_API_KEY="re_test_only" DIGEST_FROM="Hi Again <hello@example.test>"
+export RESEND_API_URL="http://localhost:$STUB_PORT/resend"
+"${PSQL[@]}" -c "select public.set_app_secret('digest', '$CRON_SECRET')" >/dev/null
 node node_modules/next/dist/bin/next build > /tmp/hiagain-e2e-build.log 2>&1 || { tail -30 /tmp/hiagain-e2e-build.log; exit 1; }
 node node_modules/next/dist/bin/next start -p "$APP_PORT" > /tmp/hiagain-e2e-app.log 2>&1 & PIDS+=($!)
 for i in $(seq 1 30); do curl -sf "http://localhost:$APP_PORT/" >/dev/null && break; sleep 1; done
 
 export BASE_URL="http://localhost:$APP_PORT" STUB_URL="http://localhost:$STUB_PORT"
 # CHECKS lets you run a subset, e.g. CHECKS="perf-check" STUB_LATENCY_MS=80 for a timing run.
-for c in ${CHECKS:-auth-errors-check handles-check signed-in-check calendar-check activity-check again-check scans-check avatar-check}; do
+for c in ${CHECKS:-auth-errors-check handles-check signed-in-check calendar-check activity-check again-check scans-check avatar-check growth-check}; do
   node "scripts/$c.mjs"
 done

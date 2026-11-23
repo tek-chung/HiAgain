@@ -9,6 +9,15 @@ export function clampDetail(detail: string | null | undefined): string | null {
   return clean ? clean.slice(0, 200) : null;
 }
 
+/**
+ * True when sign-in finished in a different browser from the one it started in (typically after
+ * approving in the LinkedIn app). Signing in again from the browser that received the callback
+ * usually succeeds straight away, so the app retries once automatically.
+ */
+export function isDifferentBrowserError(detail: string | null | undefined): boolean {
+  return /code verifier not found|initiated in a different browser|different browser/i.test(detail ?? "");
+}
+
 export function explainSignInError(reason: string | null | undefined, detail: string | null | undefined): string {
   const d = (detail ?? "").toLowerCase();
   if (reason === "not_configured") return "Sign-in isn't configured on this deployment: the Supabase environment variables are missing.";

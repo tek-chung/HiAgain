@@ -38,3 +38,9 @@ end $$;
 -- A fictional account that will delete itself in the deletion journey (profile created at first sign-in).
 insert into auth.users (id, raw_user_meta_data, email) values
   ('00000000-0000-4000-8000-0000000000d4', '{"name":"Dana Fox"}', 'dana@example.test');
+
+-- Growth-loop journeys (events, review, digest): an organiser and two attendees, created at first sign-in.
+insert into auth.users (id, raw_user_meta_data, email) values
+  ('00000000-0000-4000-8000-0000000000e1', '{"name":"Gwen Host"}',  'gwen@example.test'),
+  ('00000000-0000-4000-8000-0000000000e2', '{"name":"Hugo Hart"}',  'hugo@example.test'),
+  ('00000000-0000-4000-8000-0000000000e3', '{"name":"Iris Ito"}',   'iris@example.test');

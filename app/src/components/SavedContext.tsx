@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBrowserClient } from "@/lib/supabase/client";
 
-export interface EncounterContext { label: string; source: "calendar_auto" | "calendar_chosen" | "manual"; eventStart: string | null }
+export interface EncounterContext { label: string; source: "calendar_auto" | "calendar_chosen" | "manual" | "event"; eventStart: string | null }
 interface Candidate { label: string; start: string; allDay: boolean }
 
 /**
@@ -69,6 +69,7 @@ export function SavedContext({ publicId, initial, dismissed }: { publicId: strin
         <p className="small" style={{ margin: 0 }}>
           <span className="muted">{ctx.source === "calendar_auto" ? "Likely met at" : "Met at"}</span> <strong>{ctx.label}</strong>
           {ctx.source === "calendar_auto" && <span className="muted"> · from your calendar</span>}
+          {ctx.source === "event" && <span className="muted"> · event</span>}
         </p>
         <span className="row" style={{ gap: 0 }}>
           <button className="btn plain small" onClick={() => { setDraft(ctx.label); setEditing(true); }}>Edit</button>

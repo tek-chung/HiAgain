@@ -19,6 +19,7 @@ pg.types.setTypeParser(1184, isoTs); // timestamptz
 pg.types.setTypeParser(1114, isoTs); // timestamp
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const codes = new Map(); // auth code -> user id
+const sentEmails = []; // digest emails "sent" through the Resend stand-in
 const failNext = new Set(); // rpc names that should fail once (simulated network/server failure)
 
 // ---- Google stand-in state ----
@@ -184,6 +185,15 @@ http.createServer(async (req, res) => {
       }
     }
 
+
+    // ---- Resend stand-in for the digest email (test only) ----
+    if (url.pathname === "/resend/emails/batch" && req.method === "POST") {
+      if (req.headers.authorization !== "Bearer re_test_only") return send(res, 401, { message: "bad key" });
+      const batch = JSON.parse((await readBody(req)) || "[]");
+      sentEmails.push(...batch);
+      return send(res, 200, { data: batch.map(() => ({ id: randomBytes(6).toString("hex") })) });
+    }
+    if (url.pathname === "/resend/sent") return send(res, 200, sentEmails);
 
     // ---- Storage stand-in: metadata in storage.objects (policies enforced), bytes in memory ----
     const pub = /^\/storage\/v1\/object\/public\/([a-z]+)\/(.+)$/.exec(url.pathname);

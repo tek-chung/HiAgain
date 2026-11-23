@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
+import { ServiceWorker } from "@/components/ServiceWorker";
 import { createClient, getViewerId } from "@/lib/supabase/server";
 import { configuredSiteUrl } from "@/lib/config";
 
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en-GB">
       <body>
         <Shell signedIn={Boolean(viewerId)} unread={unread}>{children}</Shell>
+        <ServiceWorker />
       </body>
     </html>
   );

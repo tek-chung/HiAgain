@@ -2,6 +2,23 @@
 
 Moved verbatim from section 11.2 of [the project reference](../HI_AGAIN_REFERENCE.md) in v1.60 (13 November 2026) to keep the reference focused on decisions. Entries are newest first. They record mock-up, hosting and planning work; none is production-application evidence.
 
+## 23 November 2026: growth loop
+
+At Tek's request ("fix all these"), after Claude's review of the whole project, Tek accepted the recommendations. Built on branch `improvements/growth-loop`; **not yet deployed**. Run migration `20261123120000_growth_loop.sql` before deploying the code.
+
+- **LinkedIn link prompt** under the QR until a link is saved (`LinkedInPrompt`).
+- **Guest nudge** after a guest save: "*Name* can't see who you are" → sign in so they have you too (`GuestNudge`).
+- **Again review** at `/review` (`my_recent_people()`), with a card on People.
+- **Event mode:** `/events`, `/e/<code>`, door QR, automatic joining, "Met at" tagging both ways, organiser totals only (mutual Agains hidden under 5 attendees). Tables `events` and `event_attendees`; `saved_people.event_id`; `save_profile` now tags. The scanner accepts event links.
+- **"Did you meet up?"** three days after a match (`match_outcomes`).
+- **Next-day digest email** through Resend from a Vercel Cron route. It counts only, is opt-out under Privacy and account, and is guarded by a hashed secret in the database (`app_secrets`, `digest_due`, `digest_mark_sent`, `digest_log`, `notification_settings`). It stays dormant until it's configured.
+- **Offline QR:** device copy, minimal service worker plus `offline.html`, an install prompt and manifest shortcuts.
+- **Sign-in retry:** retries once automatically after a different-browser return, with no loop.
+- **Funnel:** `log_funnel()` stores daily totals with no identifiers; `funnel_report()` is for the SQL Editor only.
+- Newly reserved addresses: `e`, `event`, `events`, `review`, `offline`, `sw`. The migration moves anyone holding one to a numbered address.
+- **Verified** (cloud sandbox, fictional data): typecheck; build; 26/26 unit tests; all database suites, including the new growth suite, which was shown to fail on a wrong expectation; 74/74 signed-in journeys (10 new, plus the updated sign-in retry check); the guest browser check at 320 and 390 px; tab timing of 47–81 ms. Screenshots of the review, organiser, LinkedIn prompt, guest nudge and offline screens were inspected.
+- **Not verified:** real Resend delivery and the Vercel cron; iPhone and Android service worker and installation; the retry with the real LinkedIn app; a real event.
+
 ## 14 November 2026: logos
 
 - Traced Tek’s two logos to vector (`brand/*.svg`) and added `app/src/components/Logo.tsx` (`LogoMark`, `LogoWordmark`, using `currentColor`).

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { LogoMark } from "@/components/Logo";
 import { SignInButton } from "@/components/SignInButton";
 import { SignInProblem } from "@/components/SignInProblem";
+import { AutoRetrySignIn } from "@/components/AutoRetrySignIn";
 import { safeNextPath } from "@/lib/core/redirect";
 import { getViewer } from "@/lib/supabase/server";
 import { isFixtureMode } from "@/lib/config";
@@ -19,7 +20,11 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       <p className="muted">Use LinkedIn to get your Hi Again QR code straight away. You can edit your profile later.</p>
       {sp.signin === "cancelled" && <p className="banner info" role="status">Sign-in was cancelled. Nothing on this browser was lost.</p>}
       {sp.signin === "failed" && <SignInProblem reason={sp.reason} detail={sp.detail} />}
-      <SignInButton next={next} />
+      {sp.retry === "1" ? (
+        <AutoRetrySignIn next={next} reason={sp.reason ?? null} detail={sp.detail ?? null} />
+      ) : (
+        <SignInButton next={next} />
+      )}
       {isFixtureMode && (
         <p className="banner info small">Development mode: Supabase isn't configured, so sign-in is unavailable. Public profiles, QR codes and guest saves still work.</p>
       )}

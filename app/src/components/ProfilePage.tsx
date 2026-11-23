@@ -5,7 +5,7 @@ import { createClient, getViewer } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/config";
 import type { Contribution } from "@/lib/core/types";
 import { ProfileView, type ServerSave } from "@/components/ProfileView";
-import type { AgainState } from "@/components/AgainBlock";
+import type { AgainState, Outcome } from "@/components/AgainBlock";
 
 /** The profile page, shared by hiagain.link/<handle> and the older /p/<id> address. */
 export async function ProfilePage({ publicId }: { publicId: string }) {
@@ -16,15 +16,21 @@ export async function ProfilePage({ publicId }: { publicId: string }) {
   let initialSave: ServerSave | null = null;
   let contributions: Contribution[] = [];
   let again: AgainState = "none";
+  let matchedAt: string | null = null;
+  let outcome: Outcome | null = null;
 
   if (viewer && !isSelf) {
     const supabase = (await createClient())!;
-    const [{ data: saved }, { data: contribs }, { data: againRows }] = await Promise.all([
+    const [{ data: saved }, { data: contribs }, { data: againRows }, { data: outcomeRows }] = await Promise.all([
       supabase.rpc("my_saved_person", { p_public_id: profile.publicId }),
       supabase.rpc("my_contributions_to", { p_public_id: profile.publicId }),
       supabase.rpc("my_again_state", { p_public_id: profile.publicId }),
+      supabase.rpc("my_match_outcome", { p_public_id: profile.publicId }),
     ]);
     again = ((againRows as Array<{ state: AgainState }> | null)?.[0]?.state) ?? "none";
+    const o = (outcomeRows as Array<{ matched_at: string; outcome: Outcome | null }> | null)?.[0];
+    matchedAt = o?.matched_at ?? null;
+    outcome = o?.outcome ?? null;
     const mine = (saved as Array<Record<string, any>> | null)?.[0];
     if (mine) {
       initialSave = {
@@ -50,6 +56,8 @@ export async function ProfilePage({ publicId }: { publicId: string }) {
       contributions={contributions}
       signInAvailable={isSupabaseConfigured}
       again={again}
+      matchedAt={matchedAt}
+      outcome={outcome}
     />
   );
 }

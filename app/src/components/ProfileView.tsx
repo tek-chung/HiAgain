@@ -15,10 +15,11 @@ import { Avatar, LinkedInLink } from "./Avatar";
 import { NoteEditor, type NoteSaveResult } from "./NoteEditor";
 import { CheckIcon } from "./Icons";
 import { SavedContext, type EncounterContext } from "./SavedContext";
-import { AgainBlock, AGAIN_INTENT, type AgainState } from "./AgainBlock";
+import { AgainBlock, AGAIN_INTENT, type AgainState, type Outcome } from "./AgainBlock";
 import { guestHashFor } from "@/lib/guest-token";
 import { explainSignInError } from "@/lib/core/signin-errors";
 import { MoreActions } from "./MoreActions";
+import { GuestNudge } from "./GuestNudge";
 
 export interface ServerSave { savedAt: string; note: string; noteUpdatedAt: string | null; archivedAt: string | null; context: EncounterContext | null; contextDismissed: boolean; source: string }
 
@@ -30,6 +31,8 @@ interface Props {
   contributions: Contribution[];
   signInAvailable: boolean;
   again: AgainState;
+  matchedAt?: string | null;
+  outcome?: Outcome | null;
 }
 
 type SaveState =
@@ -41,7 +44,7 @@ function newKey(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function ProfileView({ profile, viewer, isSelf, initialSave, contributions, signInAvailable, again }: Props) {
+export function ProfileView({ profile, viewer, isSelf, initialSave, contributions, signInAvailable, again, matchedAt = null, outcome = null }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const [save, setSave] = useState<SaveState>(
@@ -200,6 +203,9 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
           {name.split(/\s+/)[0] || "They"} will see you visited.{viewer ? "" : " Guests show as an anonymous nickname."}
         </p>
       )}
+      {!isSelf && !viewer && signInAvailable && save.kind === "saved" && save.where === "browser" && (
+        <GuestNudge name={name} publicId={profile.publicId} />
+      )}
       {resumeNotice && <p className="banner info small" role="status">{resumeNotice}</p>}
       {!isSelf && save.kind === "saved" && save.archivedAt && (
         <div className="banner info small row spread" role="status">
@@ -217,6 +223,8 @@ export function ProfileView({ profile, viewer, isSelf, initialSave, contribution
           initial={again}
           resume={resumeId === AGAIN_INTENT}
           signInAvailable={signInAvailable}
+          matchedAt={matchedAt}
+          outcome={outcome}
         />
       )}
 

@@ -22,10 +22,18 @@ try {
     await page.getByRole("button", { name: "Continue with LinkedIn" }).waitFor();
   });
 
-  await step("a broken code exchange is explained", async () => {
+  await step("a different-browser return restarts sign-in here once, then explains", async () => {
+    await page.goto(`${BASE}/auth/callback?code=not-a-real-code&next=/me`);
+    // First time: starts LinkedIn sign-in again automatically from this browser.
+    await page.waitForURL(/\/auth\/v1\/authorize/);
+    // Straight after, a second failure is explained instead of retrying again (no loop).
+    // (Clearing cookies drops the code verifier that the automatic retry just stored.)
+    await page.goto(`${BASE}/sign-in?next=/me`);
+    await page.context().clearCookies();
     await page.goto(`${BASE}/auth/callback?code=not-a-real-code&next=/me`);
     await page.waitForURL(/\/sign-in\?/);
     await page.getByText("Sign-in came back in a different browser from the one it started in").waitFor();
+    await page.getByRole("button", { name: "Continue with LinkedIn" }).waitFor();
   });
 
   await step("Supabase returning to the home page (Site URL fallback) still completes sign-in", async () => {

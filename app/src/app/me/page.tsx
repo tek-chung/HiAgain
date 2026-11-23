@@ -13,6 +13,8 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { ImportPanel } from "@/components/ImportPanel";
 import { CalendarCard } from "@/components/CalendarCard";
 import { AccountSettings } from "@/components/AccountSettings";
+import { LinkedInPrompt } from "@/components/LinkedInPrompt";
+import { QuickQr } from "@/components/QuickQr";
 import { createClient } from "@/lib/supabase/server";
 import { getCalendarState, type CalendarState } from "@/lib/calendar/service";
 import type { ActionKind } from "@/lib/core/types";
@@ -26,6 +28,7 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
   const prompts: Record<ActionKind, string> = { join_me: "", question: "", feedback: "" };
   let calendar: CalendarState | null = null;
   let blocked: { publicId: string; displayName: string; avatarUrl: string | null }[] = [];
+  let digestEmail = true;
 
   if (isFixtureMode) {
     const f = FIXTURE_PROFILES.find((p) => p.publicId === FIXTURE_OWNER_ID)!;
@@ -35,12 +38,14 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
     if (!viewerId) redirect("/sign-in?next=/me");
     const supabase = (await createClient())!;
     // Everything this page needs, fetched at the same time.
-    const [mine, { data: acts }, cal, { data: bl }] = await Promise.all([
+    const [mine, { data: acts }, cal, { data: bl }, { data: ns }] = await Promise.all([
       getMyProfile(),
       supabase.from("profile_actions").select("kind, prompt").eq("active", true),
       getCalendarState(supabase),
       supabase.rpc("my_blocked"),
+      supabase.from("notification_settings").select("digest_email"),
     ]);
+    digestEmail = (ns as Array<{ digest_email: boolean }> | null)?.[0]?.digest_email ?? true;
     if (!mine) {
       return <p className="banner error" role="alert">We couldn&apos;t load your profile. Refresh to try again.</p>;
     }
@@ -72,6 +77,8 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
       <div className="qr" role="img" aria-label={`QR code for ${url}`} dangerouslySetInnerHTML={{ __html: svg }} />
       <p style={{ textAlign: "center", fontWeight: 600 }}>Let people scan this to save you</p>
       <ShareLink url={url} name={name} />
+      <QuickQr url={url} svg={svg} name={name} />
+      {viewer && !profile.linkedinUrl && <LinkedInPrompt displayName={profile.displayName} headline={profile.headline} />}
       <div style={{ marginTop: "1.25rem" }} className="stack">
         {!isFixtureMode && (
           <ProfileEditor
@@ -86,7 +93,8 @@ export default async function MyQrPage({ searchParams }: { searchParams: Promise
         )}
         {calendar && <CalendarCard initialStatus={calendar.status} accountLabel={calendar.accountLabel} outcome={sp.calendar} />}
         <a className="btn full plain" href={profile.handle ? `/${profile.handle}` : `/p/${profile.publicId}`}>See what people see</a>
-        {viewer && <AccountSettings userId={viewer.userId} blocked={blocked} />}
+        {viewer && <a className="btn full plain" href="/events">Running an event? Get an event QR</a>}
+        {viewer && <AccountSettings userId={viewer.userId} blocked={blocked} digestEmail={digestEmail} />}
         {viewer && <div style={{ textAlign: "center" }}><SignOutButton userId={viewer.userId} /></div>}
       </div>
     </section>

@@ -2,6 +2,7 @@ import { createClient, getViewer, getViewerId } from "@/lib/supabase/server";
 import type { SavedPerson } from "@/lib/core/types";
 import { PeopleList, type GuestVisitor } from "@/components/PeopleList";
 import { ImportPanel } from "@/components/ImportPanel";
+import Link from "next/link";
 
 export const metadata = { title: "People" };
 export const dynamic = "force-dynamic";
@@ -13,10 +14,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   let saves: (SavedPerson & { context?: string | null; source?: string })[] | null = null;
   let loadError = false;
   let viewer = null;
+  let toReview = 0;
   if (viewerId) {
     const supabase = (await createClient())!;
-    const [{ data, error }, { data: guests }, v] = await Promise.all([supabase.rpc("my_saved_people"), supabase.rpc("my_guest_encounters"), getViewer()]);
+    const [{ data, error }, { data: guests }, v, { data: recent }] = await Promise.all([
+      supabase.rpc("my_saved_people"), supabase.rpc("my_guest_encounters"), getViewer(),
+      supabase.rpc("my_recent_people", { p_days: 3 }),
+    ]);
     viewer = v;
+    toReview = ((recent as Array<{ again_state: string }> | null) ?? []).filter((r) => r.again_state === "none").length;
     visitors = ((guests as Array<Record<string, any>> | null) ?? [])
       .filter((g) => !g.archived_at)
       .map((g) => ({ id: g.id, alias: g.alias, firstAt: g.first_at }));
@@ -31,6 +37,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     <section>
       <h1>People</h1>
       {viewer && <ImportPanel accountName={viewer.displayName} />}
+      {toReview > 0 && (
+        <Link className="card review-cta" href="/review" data-testid="review-cta">
+          <strong>Who would you like to meet again?</strong>
+          <span className="small muted">{toReview === 1 ? "1 person" : `${toReview} people`} from the last few days. Only revealed when it&apos;s mutual.</span>
+        </Link>
+      )}
       {loadError && <p className="banner error" role="alert">Couldn&apos;t load your People. Refresh to try again.</p>}
       <PeopleList accountSaves={saves} guestVisitors={visitors} notice={sp.blocked ? "Blocked. You won't see each other in Hi Again." : null} />
     </section>

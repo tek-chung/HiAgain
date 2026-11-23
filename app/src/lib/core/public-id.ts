@@ -15,7 +15,7 @@ export function profilePath(publicId: string): string {
 export const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // App pages that are never handles (kept in step with is_reserved_handle() in the database).
-const APP_PATHS = new Set(["me", "people", "activity", "scan", "sign-in", "auth", "api", "calendar", "p", "in"]);
+const APP_PATHS = new Set(["me", "people", "activity", "scan", "sign-in", "auth", "api", "calendar", "p", "in", "e", "event", "events", "review", "offline", "sw"]);
 
 export function isValidHandle(value: unknown): value is string {
   return typeof value === "string" && value.length <= 60 && HANDLE_PATTERN.test(value) && !APP_PATHS.has(value);
@@ -51,6 +51,9 @@ export function profilePathFromScan(text: string, currentHost?: string): string 
   if (u.protocol !== "https:" && u.protocol !== "http:") return null;
   const byId = /^\/p\/([A-Za-z0-9_-]{12})\/?$/.exec(u.pathname);
   if (byId) return profilePath(byId[1]);
+  // An event's door QR (hiagain.link/e/<code>), only from Hi Again's own addresses.
+  const byEvent = /^\/e\/([A-Za-z0-9_-]{12})\/?$/.exec(u.pathname);
+  if (byEvent && isHiAgainHost(u.host, currentHost)) return `/e/${byEvent[1]}`;
   const byHandle = /^\/([a-z0-9-]{1,60})\/?$/.exec(u.pathname.toLowerCase());
   if (byHandle && isValidHandle(byHandle[1]) && isHiAgainHost(u.host, currentHost)) return `/${byHandle[1]}`;
   return null;

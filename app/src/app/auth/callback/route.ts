@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/core/redirect";
 import { isValidHandle } from "@/lib/core/public-id";
-import { clampDetail, type SignInReason } from "@/lib/core/signin-errors";
+import { clampDetail, isDifferentBrowserError, type SignInReason } from "@/lib/core/signin-errors";
 
 // OAuth return point. Exchanges the code (PKCE), creates the starter profile idempotently,
 // then returns the person to where they started. Never redirects off-site. Failures go to a page
@@ -40,6 +40,17 @@ export async function GET(request: NextRequest) {
   if (!code) return fail("no_code");
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error && isDifferentBrowserError(error.message)) {
+    // Approved in the LinkedIn app, returned to a different browser: start again here, once,
+    // automatically (the sign-in page guards against looping and explains if it fails again).
+    const retry = new URL("/sign-in", origin);
+    retry.searchParams.set("next", next);
+    retry.searchParams.set("retry", "1");
+    retry.searchParams.set("reason", "exchange");
+    const d = clampDetail(error.message);
+    if (d) retry.searchParams.set("detail", d);
+    return NextResponse.redirect(retry);
+  }
   if (error) return fail("exchange", error.message);
 
   const { error: profileError } = await supabase.rpc("ensure_starter_profile");

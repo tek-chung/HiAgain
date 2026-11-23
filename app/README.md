@@ -32,7 +32,12 @@ Without Supabase settings the app runs in **development-fixture mode**:
    - Set up the consent screen with the scopes `…/auth/calendar.calendarlist.readonly` and `…/auth/calendar.events.readonly`.
    - Create a *Web application* client with redirect URIs `https://hiagain.link/calendar/callback` and `http://localhost:3000/calendar/callback`, then add the three Google variables below.
    - Calendar scopes are "sensitive". Until Google verifies the app, only test users you add can connect, and their access lapses after about 7 days.
-9. **Check once:** delete a throwaway account to confirm the database role can delete from `auth.users`. Account deletion relies on it.
+9. **Next-day digest email (optional, recommended):**
+   - Create a [Resend](https://resend.com) account, verify `hiagain.link` as a sending domain and create an API key.
+   - In Vercel add `RESEND_API_KEY`, `DIGEST_FROM` (e.g. `Hi Again <hello@hiagain.link>`) and `CRON_SECRET` (at least 32 random characters: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
+   - In the Supabase SQL Editor run once, with the same value: `select public.set_app_secret('digest', '<CRON_SECRET>');`
+   - `vercel.json` schedules `/api/cron/digest` daily at 08:30 UTC (08:30 in winter, 09:30 in summer, UK time). Without these settings the route answers "disabled" and nothing is sent.
+10. **Check once:** delete a throwaway account to confirm the database role can delete from `auth.users`. Account deletion relies on it.
 
 | Variable | Where | Value |
 | --- | --- | --- |
@@ -40,6 +45,8 @@ Without Supabase settings the app runs in **development-fixture mode**:
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production + Preview | Supabase publishable key (the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works) |
 | `NEXT_PUBLIC_SITE_URL` | Production | `https://hiagain.link`, used in QR codes. Read at build time, so redeploy after changing it |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | optional | Google OAuth client |
+| `CRON_SECRET` | optional | At least 32 random characters. Vercel Cron sends it to the digest route; the database must hold the same value (`set_app_secret`, step 9) |
+| `RESEND_API_KEY`, `DIGEST_FROM` | optional | Resend API key and the sender, e.g. `Hi Again <hello@hiagain.link>`. Both needed for the digest |
 | `CALENDAR_TOKEN_KEY` | optional | 32 random bytes, base64: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Changing it disconnects everyone's calendar |
 
 Never add the Supabase service-role key: the app doesn't use one.
@@ -55,7 +62,7 @@ Never add the Supabase service-role key: the app doesn't use one.
 | `npm test` | Unit tests for the pure logic |
 | `npm run test:db` | Migrations + access-control tests on a throwaway local Postgres, including race tests (simultaneous imports, Again taps, same-name sign-ups). Needs a local Postgres 15+ superuser |
 | `npm run check:browser` | Guest journey and camera scanning (Chromium's fake camera) against a running fixture-mode server (`BASE_URL`, default `http://localhost:3000`) |
-| `npm run check:signed-in` | 64 signed-in journeys end to end: real migrations, a production build, Playwright, and a **test-only Supabase and Google stand-in** (`scripts/supabase-stub.mjs`, never deploy it). Needs local Postgres |
+| `npm run check:signed-in` | 74 signed-in journeys end to end: real migrations, a production build, Playwright, and a **test-only Supabase and Google stand-in** (`scripts/supabase-stub.mjs`, never deploy it). Needs local Postgres |
 | `npm run check:perf` | Times bottom-tab navigation with 80 ms of simulated app–database distance |
 
 Playwright needs a browser once: `npx playwright install chromium`. `.github/workflows/ci.yml` runs all of these on every push that touches `app/`.
@@ -65,7 +72,8 @@ Playwright needs a browser once: `npx playwright install chromium`. `.github/wor
 ```
 src/
   app/                 / · /sign-in · /auth/callback · /me (My QR) · /[handle] and /p/[publicId] (profiles)
-                       · /people · /people/archive · /people/guest/[id] · /activity · /scan
+                       · /people · /people/archive · /people/guest/[id] · /activity · /scan · /review
+                       · /events · /e/[code] (event page and door QR) · /api/cron/digest
                        · /calendar/connect|callback · /api/calendar[/context|/ideas] · /api/account/delete
   components/          UI (ProfilePage + ProfileView, PeopleList, ActivityList, AgainBlock, Scanner, …)
   lib/core/            pure, unit-tested logic shared by browser and server
@@ -108,6 +116,29 @@ scripts/               test runners, browser checks, fake camera, test-only Supa
 
 **Google Calendar.** It's a separate, optional connection under My QR. It never changes the LinkedIn sign-in. It uses read-only permission to list calendars and view events, with PKCE and a CSRF state cookie, and the grant must come back to the same account. People can untick permissions on Google's screen: without event access nothing is stored, and with events but no calendar list only the main calendar is used. The refresh token is stored encrypted with a server-only key and tied to the account, and the database never sees it in clear. Raw events are never stored. When someone is saved and exactly one event fits the time, the app privately notes "Likely met at …". With several, the person chooses; with none, they can type it. Context can be edited or removed with Undo, and a removed context isn't guessed again. If access expires or is revoked, the app asks to reconnect while everything else keeps working. Disconnecting revokes the token at Google and deletes inferred context, but keeps context the person chose or typed. Join me ideas from upcoming events sit at the bottom of Edit profile: two at first, Show more, Dismiss with Undo, and private events left out. Nothing is published until the owner edits the wording, ticks "This event is public and open to guests" and saves.
 
+**LinkedIn link prompt.** Sign-in with LinkedIn doesn't share the profile link, so until one is saved My QR shows **Add your LinkedIn link** right under the QR: paste (the clipboard is read only when Paste is tapped) or type, and it saves in place. Without it, scanners can't connect and a mutual Again has nowhere to go.
+
+**Guest nudge.** Once a profile is saved on a guest's browser, they see "*Name* can't see who you are" with **Sign in so *Name* has you too**. Signing in returns them to the profile, which then saves to their account and puts them in the owner's People by name. The earlier anonymous visit stays anonymous, as decided.
+
+**Again review (`/review`).** Everyone the person saved in the last 7 days, grouped by event (then by day), each with a one-tap Again. Only the person's own Again state is shown (`my_recent_people()`), never an incoming one-sided Again. People shows a "Who would you like to meet again?" card while anyone from the last 3 days is undecided; the digest email links here.
+
+**Events (`/events`, `/e/<code>`).**
+- **Creating:** an organiser gives a name, date and start and end times (up to 3 days; an end before the start means past midnight). At most 20 a day.
+- **Joining:** the event page's QR goes at the door. A signed-in visitor joins on opening it; a guest is asked to **Join with LinkedIn**. The in-app scanner accepts event links from Hi Again's own addresses. Attendees can leave.
+- **Tagging:** while an event is on (2 hours before its start to 2 hours after its end), a save between two attendees is tagged "Met at *event*" both ways. Joining also tags people already saved there that day. Context the person set or removed is never replaced; calendar inference doesn't overwrite it.
+- **Privacy:** attendance is readable only by the attendee. The organiser sees **totals only**: joined, connections and mutual Agains. Mutual Agains stay hidden until 5 people have joined. The public page shows the name, times, organiser's name and how many joined.
+- **Deletion:** deleting the organiser's account deletes their events; people keep the "Met at" text they saw.
+
+**"Did you meet up?"** Three days after a mutual match, each person sees **We met / It's planned / Not yet / No** on the match. Answers are private to each person (`match_outcomes`) and counted in aggregate. A match also explains how to reach someone who hasn't added a LinkedIn link: through their invitations.
+
+**Next-day digest email.** Each morning `/api/cron/digest` asks the database (`digest_due()`, which refuses without the digest secret) who met people or got a new mutual match yesterday, UK time. It then sends one email each through Resend: counts and the event name only, never the names of people met, and never a one-sided Again. It links to `/review`. Sent days are logged (`digest_log`), so nobody gets two in a day. People turn it off under My QR → Privacy and account (on by default). The route uses only the publishable key; the database checks a SHA-256 hash of the secret.
+
+**Offline QR and home screen.** My QR keeps a copy of the QR on the device. When a page can't load offline, a minimal service worker (`public/sw.js`, never caching pages) shows `offline.html`, which displays that copy. My QR offers **Add to home screen** (an install prompt on Android; instructions on iPhone). The manifest adds My QR, Scan and Review shortcuts. Signing out or deleting the account removes the copy.
+
+**Sign-in retry.** If sign-in comes back in a different browser (typically after approving in the LinkedIn app), the app starts sign-in again in that browser once, automatically. It won't retry again within 3 minutes, so it can't loop; it explains instead.
+
+**Measuring the pilot.** Run `select * from public.funnel_report(30);` in the Supabase SQL Editor. It counts, from existing tables: accounts, LinkedIn links, guest scans, imports, scans, contributions, events, event joins, tagged saves, digests, Agains, matches and "met"/"planned" answers. A few in-browser steps (nudge shown and tapped, review opened, match message copied, LinkedIn opened, event QR shown, install tapped) are stored only as **daily totals with no user or device identifiers** (`log_funnel()`). Anyone could inflate these counts, so treat them as indicative.
+
 **Photos.** Add, change or remove a photo under Edit profile. It's saved straight away. The browser crops it to a 512×512 JPEG, which also drops location and other EXIF data, then uploads it to Supabase Storage at `avatars/<your user id>/`. The bucket is public, because the photo is a public profile field, and limited to 1 MB of JPEG, PNG or WebP. Storage policies allow writing only in your own folder. The database accepts only an avatar URL inside your own folder, so a profile can't point at an outside or tracking image. Older photos are deleted when you change or remove yours, and all of them when you delete your account. Migration `20261114090000_avatars.sql` creates the bucket and policies.
 
 **Blocking, reporting, deletion.** Block and Report are under "More" at the bottom of a profile.
@@ -131,4 +162,5 @@ All confirmed by Tek on 13–14 November 2026.
 - **Blocking** is silent, full separation. **Deleting an account** removes everything, including contributions sent to others.
 - **Calendar disconnect** deletes guessed context and keeps context the person picked or typed.
 - **Retention:** anonymous guest visits last 12 months after the most recent visit. Everything else stays until account deletion.
-- **No email notifications** for the pilot. Activity is in-app.
+- **Email:** one next-day digest, opt-out, counts only (Tek accepted, 23 November 2026, superseding "no email for the pilot"). Activity remains the in-app notification.
+- **Growth loop** (Tek accepted, 23 November 2026): LinkedIn link prompt, guest nudge, Again review, Event mode with organiser totals only, "Did you meet up?", offline QR, sign-in retry, funnel counts.

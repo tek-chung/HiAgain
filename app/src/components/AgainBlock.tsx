@@ -5,6 +5,7 @@ import { getBrowserClient } from "@/lib/supabase/client";
 import { startLinkedInSignIn } from "@/lib/auth-client";
 import { GUEST_SCOPE } from "@/lib/core/guest";
 import { deleteDraft, listDrafts, putDraft } from "@/lib/guest-store";
+import { logFunnel } from "@/lib/funnel";
 
 export type AgainState = "none" | "sent" | "matched";
 export const AGAIN_INTENT = "again"; // draft key used to carry the intent through sign-in
@@ -24,13 +25,26 @@ interface Props {
   initial: AgainState;
   resume: boolean;
   signInAvailable: boolean;
+  /** When the match was made, and this person's own answer to "Did you meet up?". */
+  matchedAt?: string | null;
+  outcome?: Outcome | null;
 }
+
+export type Outcome = "met" | "planned" | "not_yet" | "no";
+const OUTCOMES: { key: Outcome; label: string }[] = [
+  { key: "met", label: "We met" },
+  { key: "planned", label: "It's planned" },
+  { key: "not_yet", label: "Not yet" },
+  { key: "no", label: "No" },
+];
+/** Ask "Did you meet up?" once a match is a few days old. */
+export const OUTCOME_ASK_AFTER_DAYS = 3;
 
 /**
  * Again: private interest in meeting again. One-sided interest is visible only to the sender;
  * both people see the match only when it's mutual. Either person can end a match.
  */
-export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, resume, signInAvailable }: Props) {
+export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, resume, signInAvailable, matchedAt = null, outcome: initialOutcome = null }: Props) {
   const router = useRouter();
   const [state, setState] = useState<AgainState>(initial);
   const [busy, setBusy] = useState(false);
@@ -40,6 +54,8 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
   const [copied, setCopied] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [outcome, setOutcome] = useState<Outcome | null>(initialOutcome);
+  const [outcomeSaved, setOutcomeSaved] = useState(false);
   const resumed = useRef(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const first = name.split(/\s+/)[0] || "they";
@@ -104,15 +120,37 @@ export function AgainBlock({ publicId, name, linkedinUrl, viewerId, initial, res
           <button
             className="btn primary"
             onClick={async () => {
+              logFunnel("match_copy_message");
               try { await navigator.clipboard.writeText(message); setCopied("Copied. Paste it wherever you talk to " + first + "."); }
               catch { textRef.current?.select(); setCopied("Couldn't copy automatically — the text is selected, so copy it yourself."); }
             }}
           >
             Copy message
           </button>
-          {linkedinUrl && <a className="btn" href={linkedinUrl} target="_blank" rel="noopener noreferrer">Open LinkedIn</a>}
+          {linkedinUrl && <a className="btn" href={linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={() => logFunnel("match_open_linkedin")}>Open LinkedIn</a>}
         </div>
         {copied && <p className="small" role="status">{copied}</p>}
+        {!linkedinUrl && (
+          <p className="small muted">{first} hasn&apos;t added a LinkedIn link yet. You can still reach them through one of their invitations below: they&apos;ll see it in their Activity.</p>
+        )}
+        {matchedAt && Date.now() - new Date(matchedAt).getTime() >= OUTCOME_ASK_AFTER_DAYS * 86_400_000 && (
+          <div data-testid="match-outcome">
+            <p className="small" style={{ margin: ".5rem 0 0", fontWeight: 600 }}>Did you meet up?</p>
+            <div className="outcome" role="radiogroup" aria-label="Did you meet up?">
+              {OUTCOMES.map((o) => (
+                <button key={o.key} role="radio" aria-checked={outcome === o.key} className={"btn small" + (outcome === o.key ? " primary" : "")}
+                  onClick={async () => {
+                    const { data } = (await getBrowserClient()?.rpc("set_match_outcome", { p_public_id: publicId, p_outcome: o.key })) ?? { data: null };
+                    if (data === "saved") { setOutcome(o.key); setOutcomeSaved(true); }
+                    else setError("Couldn't save your answer. Try again.");
+                  }}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            {outcomeSaved && <p className="small muted" role="status">Thanks. Only you can see your answer; it helps Hi Again learn what works.</p>}
+          </div>
+        )}
         <p className="small muted">Hi Again doesn&apos;t send this or book anything — you choose how to get in touch.</p>
         {confirmEnd ? (
           <div className="banner info small">
